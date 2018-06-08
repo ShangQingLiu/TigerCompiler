@@ -1,5 +1,5 @@
-a.out: parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o f_translate.o
-	gcc -g parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o f_translate.o
+a.out: parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o frame.o temp.o assem.o
+	gcc -g parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o frame.o temp.o assem.o
 
 parsetest.o: parsetest.c errormsg.h utils.h past.h
 	gcc -g -c parsetest.c
@@ -8,7 +8,7 @@ y.tab.o: y.tab.c
 	gcc -g -c y.tab.c
 
 y.tab.c: parser.y
-	yacc -dv parser.y
+	# bison -dv parser.y
 
 y.tab.h: y.tab.c
 	echo "y.tab.h was created at the same time as y.tab.c"
@@ -28,11 +28,11 @@ lex.yy.c: tiger.l
 past.o: past.c past.h
 	gcc -g -c past.c
 
-#tree.o: tree.c tree.h
-#	gcc -g -c tree.c
+tree.o: tree.c tree.h
+	gcc -g -c tree.c
 
-f_translate.o: f_translate.c f_translate.h ast.h
-	gcc -g -c f_translate.c
+translate.o: translate.c translate.h ast.h
+	gcc -g -c translate.c
 
 types.o: types.c types.h
 	gcc -g -c types.c
@@ -54,6 +54,16 @@ table.o: table.c table.h
 
 utils.o: utils.c utils.h
 	gcc -g -c utils.c
+
+frame.o: x86frame.c frame.h
+	gcc -g -c x86frame.c -o frame.o
+
+
+temp.o: temp.c temp.h
+	gcc -g -c temp.c
+
+assem.o: assem.c assem.h
+	gcc -g -c assem.c
 
 clean: 
 	rm -f a.out utils.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o

@@ -38,26 +38,26 @@ table_t E_base_venv(void)
 	table_t venv = SymbolEmpty();
 	// Create function environment entries
 	E_enventry env_print = E_FunEntry(Tr_outermost(), Temp_newlabel(),
-		Ty_TyList(NewTyString(), NULL), NewTyVoid());
+		NewTyList(NewTyString(), NULL), NewTyVoid());
 	E_enventry env_flush = E_FunEntry(Tr_outermost(), Temp_newlabel(),
 		NULL, NewTyVoid());
 	E_enventry env_getchar = E_FunEntry(Tr_outermost(), Temp_newlabel(),
 		NULL, NewTyString());
 	E_enventry env_ord = E_FunEntry(Tr_outermost(), Temp_newlabel(),
-		Ty_TyList(NewTyString(), NULL), NewTyInt());
+		NewTyList(NewTyString(), NULL), NewTyInt());
 	E_enventry env_chr = E_FunEntry(Tr_outermost(), Temp_newlabel(),
-		Ty_TyList(NewTyInt(), NULL), NewTyString());
+		NewTyList(NewTyInt(), NULL), NewTyString());
 	E_enventry env_size = E_FunEntry(Tr_outermost(), Temp_newlabel(),
-		Ty_TyList(NewTyString(), NULL), NewTyInt());
+		NewTyList(NewTyString(), NULL), NewTyInt());
 	E_enventry env_substring = E_FunEntry(Tr_outermost(), Temp_newlabel(),
-		Ty_TyList(NewTyString(), Ty_TyList(NewTyInt(),
-					Ty_TyList(NewTyInt(), NULL))), NewTyString());
+		NewTyList(NewTyString(), NewTyList(NewTyInt(),
+					NewTyList(NewTyInt(), NULL))), NewTyString());
 	E_enventry env_concat = E_FunEntry(Tr_outermost(), Temp_newlabel(),
-		Ty_TyList(NewTyString(), Ty_TyList(NewTyString(), NULL)), NewTyString());
+		NewTyList(NewTyString(), NewTyList(NewTyString(), NULL)), NewTyString());
 	E_enventry env_not = E_FunEntry(Tr_outermost(), Temp_newlabel(),
-		Ty_TyList(NewTyInt(), NULL), NewTyInt());
+		NewTyList(NewTyInt(), NULL), NewTyInt());
 	E_enventry env_exit = E_FunEntry(Tr_outermost(), Temp_newlabel(),
-		Ty_TyList(NewTyInt(), NULL), NewTyVoid());
+		NewTyList(NewTyInt(), NULL), NewTyVoid());
 	// Add the functions to the environment
 	SymbolEnter(venv, Symbol("print"), env_print);
 	SymbolEnter(venv, Symbol("flush"), env_flush);

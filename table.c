@@ -82,7 +82,7 @@ void *TablePop(table_t t)
 }
 
 // Show the table
-void TableDump(table_t t, tab_dump_func_t show)
+void TAB_dump(table_t t, tab_dump_func_t show)
 {
 	void *k = t->top;
 	int index = ((unsigned)k) % TABSIZE;

@@ -9,6 +9,6 @@ void    *TableLookup(table_t tab, void *key);
 void    *TablePop(table_t tab);
 
 typedef void (*tab_dump_func_t)(void *key, void *value);
-void    TableDump(table_t tab, tab_dump_func_t show);
+void    TAB_dump(table_t tab, tab_dump_func_t show);
 
 #endif

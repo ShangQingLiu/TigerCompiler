@@ -39,7 +39,7 @@ static Temp_tempList F_special_registers(void);
 static Temp_tempList F_arg_registers(void);
 static Temp_tempList F_callee_saves(void);
 
-static void F_add_to_map(string str, Temp_temp temp);
+static void F_add_to_map(string_t str, Temp_temp temp);
 
 static F_accessList F_AccessList(F_access head, F_accessList tail)
 {
@@ -149,7 +149,7 @@ Temp_tempList F_caller_saves(void)
 }
 
 Temp_map F_tempMap = NULL;
-static void F_add_to_map(string str, Temp_temp temp)
+static void F_add_to_map(string_t str, Temp_temp temp)
 {
 	if (!F_tempMap) {
 		F_tempMap = Temp_name();
@@ -188,7 +188,7 @@ bool F_doesEscape(F_access access)
 	return (access != NULL && access->kind == inFrame);
 }
 
-F_frag F_StringFrag(Temp_label label, string str)
+F_frag F_StringFrag(Temp_label label, string_t str)
 {
 	F_frag strfrag = checked_malloc(sizeof(*strfrag));
 	strfrag->kind = F_stringFrag;
@@ -268,7 +268,7 @@ T_exp F_Exp(F_access access, T_exp framePtr)
 	}
 }
 
-T_exp F_externalCall(string str, T_expList args)
+T_exp F_externalCall(string_t str, T_expList args)
 {
 	return T_Call(T_Name(Temp_namedlabel(str)), args);
 }

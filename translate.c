@@ -390,7 +390,7 @@ Tr_exp Tr_subscriptVar(Tr_exp arrayBase, Tr_exp index)
 
 Tr_exp Tr_arrayExp(Tr_exp size, Tr_exp init)
 {
-	return Tr_Ex(F_externalCall(String("initArray"),
+	return Tr_Ex(F_externalCall(string("initArray"),
 			T_ExpList(unEx(size), T_ExpList(unEx(init), NULL))));
 }
 
@@ -398,7 +398,7 @@ Tr_exp Tr_recordExp(int n, Tr_expList list)
 {
 	Temp_temp r = Temp_newtemp();
 	T_stm alloc = T_Move(T_Temp(r),
-		F_externalCall(String("initRecord"), T_ExpList(T_Const(n * F_WORD_SIZE), NULL)));
+		F_externalCall(string("initRecord"), T_ExpList(T_Const(n * F_WORD_SIZE), NULL)));
 	int i = n - 1;
 	Tr_node p = list->head->next;
 	T_stm seq = T_Move(T_Mem(T_Binop(T_plus, T_Temp(r), T_Const(i-- * F_WORD_SIZE))),
@@ -545,7 +545,7 @@ Tr_exp Tr_eqExp(A_oper op, Tr_exp left, Tr_exp right)
 
 Tr_exp Tr_eqStringExp(A_oper op, Tr_exp left, Tr_exp right)
 {
-	T_exp result = F_externalCall(String("stringEqual"),
+	T_exp result = F_externalCall(string("stringEqual"),
 		T_ExpList(unEx(left), T_ExpList(unEx(right), NULL)));
 	if (op == A_eqOp) return Tr_Ex(result);
 	else {
@@ -569,7 +569,7 @@ Tr_exp Tr_callExp(Tr_level level, Tr_level funLevel, Temp_label funLabel, Tr_exp
 }
 
 static F_fragList stringList = NULL;
-Tr_exp Tr_stringExp(string str)
+Tr_exp Tr_stringExp(string_t str)
 {
 	Temp_label strLabel = Temp_newlabel();
 	F_frag fragment = F_StringFrag(strLabel, str);
@@ -588,7 +588,7 @@ Tr_exp Tr_nilExp(void)
 	if (!nilTemp){
 		nilTemp = Temp_newtemp();
 		T_stm alloc = T_Move(T_Temp(nilTemp),
-			F_externalCall(String("initRecord"), T_ExpList(T_Const(0 * F_WORD_SIZE), NULL)));
+			F_externalCall(string("initRecord"), T_ExpList(T_Const(0 * F_WORD_SIZE), NULL)));
 		return Tr_Ex(T_Eseq(alloc, T_Temp(nilTemp)));;
 	}
 	return Tr_Ex(T_Temp(nilTemp));

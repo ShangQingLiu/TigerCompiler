@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include "util.h"
+#include "utils.h"
 #include "table.h"
 
 typedef struct G_graph_ *G_graph;  /* The "graph" type */

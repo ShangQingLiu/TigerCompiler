@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "codegen.h"
 #include "temp.h"
-#include "util.h"
+#include "utils.h"
 
 static AS_instrList instrList = NULL, last = NULL;
 

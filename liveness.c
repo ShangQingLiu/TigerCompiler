@@ -1,5 +1,5 @@
 #include "liveness.h"
-#include "util.h"
+#include "utils.h"
 #include "flowgraph.h"
 
 static G_table liveMap;

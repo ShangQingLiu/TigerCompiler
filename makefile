@@ -19,8 +19,11 @@ errormsg.o: errormsg.c errormsg.h utils.h
 lex.yy.o: lex.yy.c y.tab.h errormsg.h utils.h ast.h
 	gcc -g -c lex.yy.c
 
-lex.yy.c: ref_tiger.lex
-	lex ref_tiger.lex
+# lex.yy.c: ref_tiger.lex
+# 	lex ref_tiger.lex
+
+lex.yy.c: tiger.l
+	flex tiger.l lex.yy.c
 
 past.o: past.c past.h
 	gcc -g -c past.c

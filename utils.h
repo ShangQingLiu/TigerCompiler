@@ -19,7 +19,7 @@ struct list_s {
     union {
         int i;
         bool b;
-        void *head;
+        void *data;
     };
     struct list_s *next;
 };

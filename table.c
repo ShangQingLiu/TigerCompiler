@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "util.h"
+#include "utils.h"
 #include "table.h"
 
 #define TABSIZE 127
@@ -16,7 +16,7 @@ struct binder_
 	void *prevtop;
 };
 
-struct table_t_
+struct table_s
 {
 	binder table[TABSIZE];
 	void *top;
@@ -82,7 +82,7 @@ void *TablePop(table_t t)
 }
 
 // Show the table
-void TableDump(table_t tab, tab_dump_func_t show)
+void TableDump(table_t t, tab_dump_func_t show)
 {
 	void *k = t->top;
 	int index = ((unsigned)k) % TABSIZE;

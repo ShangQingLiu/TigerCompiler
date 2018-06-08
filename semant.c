@@ -1,5 +1,5 @@
 #include "semant.h"
-#include "util.h"
+#include "utils.h"
 #include "errormsg.h"
 #include "env.h"
 #include <assert.h>

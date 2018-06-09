@@ -159,6 +159,7 @@ RA_regAlloc(F_frame f, AS_instrList il)
 	printf("debug = %d\n", debug);
     G_graph flowgraph = FG_AssemFlowGraph(il);
     Live_graph livegraph = Live_liveness(flowgraph);
+	G_show(stdout, livegraph->graph->mynodes, NULL);
 
     Temp_tempList regs = F_registers();
     struct COL_result cr =  COL_color(livegraph, F_tempMap, regs);

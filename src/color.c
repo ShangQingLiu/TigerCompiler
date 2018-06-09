@@ -55,17 +55,18 @@ static void Simplify(Live_graph lg)
     G_nodeList l;
 
     while (simplifyList)
-    {
+    {        
         p = simplifyList;
         n = p->data;
         simplifyList = simplifyList->tail;
         free(p);
+        Degree[n->mykey] = -1; // Marked as simplified
+        Stack[sp++] = n;
+        
         for (l = n->succs; l; l = l->tail)
         {
             decDegree(l->head);
         }
-        Degree[n->mykey] = -1; // Marked as simplified
-        Stack[sp++] = n;
     }
 }
 
@@ -138,22 +139,24 @@ static char Coalesce(Live_graph lg)
                 deleteFrom(s, &spillList);
             #ifdef COL_DEBUG
             list_t temp;
-            //printf("list R %d:\n", r->mykey);
+            printf("list R %d:\n", r->mykey);
             for (temp=NodeMoves[rNum]; temp; temp=temp->tail) {
-                //printf("%d  ", ((G_node)(temp->data))->mykey);
+                printf("%d  ", ((G_node)(temp->data))->mykey);
             }
-            //printf("\nlist S %d:\n", s->mykey);
+            printf("\nlist S %d:\n", s->mykey);
             for (temp=NodeMoves[sNum]; temp; temp=temp->tail) {
-                //printf("%d  ", ((G_node)(temp->data))->mykey);
+                printf("%d  ", ((G_node)(temp->data))->mykey);
             }
             #endif
 
+            deleteFrom(r, &NodeMoves[sNum]);
+            deleteFrom(s, &NodeMoves[rNum]);
             mergeList(&NodeMoves[rNum], &NodeMoves[sNum]);
             
             #ifdef COL_DEBUG
-            //printf("\nMerged list R:\n");
+            printf("\nMerged list R:\n");
             for (temp=NodeMoves[rNum]; temp; temp=temp->tail) {
-                //printf("%d  ", ((G_node)(temp->data))->mykey);
+                printf("%d  ", ((G_node)(temp->data))->mykey);
             }
             #endif
 
@@ -184,13 +187,17 @@ static void FreezeAdj(G_node n)
         {
             G_node t = iter->data;
             int tNum = t->mykey;
-            //printf("\tMove to %d\n", tNum);
+            #ifdef COL_DEBUG
+            printf("\tMove to %d\n", tNum);
+            #endif
             if (t==n || Degree[tNum]<0 || Alias[tNum])
             {
                 // Remove this node from move list
                 p = iter;
                 iter = iter->tail;
-                //printf("delete node move:%d %p %p\n", tNum, p, iter);
+                #ifdef COL_DEBUG
+                printf("delete node move:%d %p %p\n", tNum, p, iter);
+                #endif
                 free(p);
                 if (last == NULL)
                     NodeMoves[mNum] = iter;
@@ -216,15 +223,14 @@ static void Freeze()
 {
     G_node n = freezeList->data;
     #ifdef COL_DEBUG
-    //printf("Freeze node: %x  %d\n", n, n->mykey);
+    printf("Freeze node: %x  %d\n", n, n->mykey);
     #endif
     deleteFrom(n, &freezeList);    
     addTo(n, &simplifyList);
-    
     FreezeAdj(n);
     #ifdef COL_DEBUG
-    //printf("Freeze adj\n");
-    #endif
+    printf("Freeze adj\n");
+    #endif    
 }
 
 static void SelectSpill()
@@ -373,8 +379,10 @@ static Temp_map AssignColor()
             if (Degree[nei->mykey] > 0 && Alias[nei->mykey] == 0)
             {
                 int neiCol = (int)Temp_look(mmap, nei->info);
-                //printf("Nei %d\n", neiCol);
-                colorPad[(int)Temp_look(mmap, nei->info)] = 1;
+                #ifdef COL_DEBUG
+                printf("\tNei %d\n", neiCol);
+                #endif
+                colorPad[neiCol] = 1;
             }
         }
         for (i=1; i<=K; i++)
@@ -393,11 +401,15 @@ static Temp_map AssignColor()
         {
             Degree[n->mykey] = 1;
             Temp_enter(mmap, n->info, (string_t)i);
-			////printf("%d ", i);
-			////printf("%d\n", (int)Temp_look(mmap, n->info));
+            #ifdef COL_DEBUG
+			printf("Node%d  Color%d sp%d\n", n->mykey, i, sp);
+			// printf("%d\n", (int)Temp_look(mmap, n->info));
+            #endif
         }
     }
-    //printf("%d Actual spills\n", count);
+    #ifdef COL_DEBUG
+    printf("%d Actual spills\n", count);
+    #endif
     return mmap;
 }
 
@@ -413,40 +425,45 @@ struct COL_result COL_color(Live_graph lg, Temp_map initial, Temp_tempList regs)
         {
             Simplify(lg);
             #ifdef COL_DEBUG
-            //printf("Simplify done: %x\n", simplifyList);
+            printf("Simplify done: %x\n", simplifyList);
             #endif
         }
         else
         {
-            tRes = Coalesce(lg);
             #ifdef COL_DEBUG
-            //printf("Coalesce done: %d\n", tRes);
+            printf("Coalesce begin\n");
             #endif
+            tRes = Coalesce(lg);
+            
             if (tRes)
                 continue;
 
             if (freezeList != NULL)
             {
-                Freeze();
                 #ifdef COL_DEBUG
-                //printf("Freeze done: %d\n", freezeList);
+                printf("Freeze begin: %d\n", freezeList);
                 #endif
+                Freeze();
             }
             else
             {
-                SelectSpill();
                 #ifdef COL_DEBUG
-                //printf("SelectSpill done\n");
+                printf("SelectSpill done\n");
                 #endif
+                SelectSpill();                
             }
         }
     }
-	////printf("sp: %d\n", sp);
+	#ifdef COL_DEBUG
+    printf("sp: %d\n", sp);
+    #endif
     struct COL_result rst;
     rst.coloring = AssignColor(lg);
     rst.spills = actualSpill;
 
     endProc(lg);
-    //printf("colend\n");
+    #ifdef COL_DEBUG
+    printf("colend\n");
+    #endif
     return rst;
 }

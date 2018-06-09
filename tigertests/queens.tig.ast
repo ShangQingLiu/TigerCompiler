@@ -159,27 +159,4 @@
 																				varExp(
 																					subscriptVar(
 																						simpleVar(diag2),
-																						opExp(
-																							MINUS,
-																							opExp(
-																								PLUS,
-																								varExp(
-																									simpleVar(r)),
-																								intExp(7)),
-																							varExp(
-																								simpleVar(c))))),
-																				intExp(0)),
-																			intExp(0)),
-																		seqExp(
-																			expList())),
-																	TRUE)),
-															expList()))),
-												fundecList()))),
-									decList()))))))),
-		seqExp(
-			expList(
-				callExp(try,
-					expList(
-						intExp(0),
-						expList())),
-				expList())))
+																						

@@ -139,13 +139,8 @@ static void traverse_expr(exp_t expr)
         case A_letExp: {
 			decList_t p;
             SymbolBeginScope(_env);
-<<<<<<< HEAD
             for (p = expr->u.let.decs; p; p = p->tail)
                 traverse_decl(p->head);
-=======
-            for (p = (list_t)(expr->u.let.decs); p; p = p->tail)
-                traverse_decl(p->data);
->>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
             traverse_expr(expr->u.let.body);
             SymbolEndScope(_env);
             break;

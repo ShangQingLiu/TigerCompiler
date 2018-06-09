@@ -221,11 +221,7 @@ Live_graph Live_liveness(G_graph flow)
 					T_enter(tempMap, p2->head, n2);
 				}
 				//bi-direction
-<<<<<<< HEAD
 				if(n1 != n2) {
-=======
-				if (n1 != n2) {
->>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
 					G_addEdge(n1, n2);
 					G_addEdge(n2, n1);
 				}

@@ -1,7 +1,7 @@
 #include "frame.h"
-
+#include "tree.h"
 #define REGDEC(name)
-	statc Temp_temp name()\
+	static Temp_temp name()\
 	{\
 		static Temp_temp name = NULL;\
 		if(!name) {\
@@ -33,6 +33,8 @@ REGDEC(ecx);
 REGDEC(esi);
 REGDEC(edi);
 REGDEC(ebp);
+
+#undef REGDEC
 
 static F_access InFrame(int offset);
 static F_access InReg(Temp_temp reg);
@@ -283,7 +285,7 @@ T_exp F_externalCall(string_t str, T_expList args)
 {
 	return T_Call(T_Name(Temp_namedlabel(str)), args);
 }
-
+/*
 T_stm F_procEntryExit1(F_frame frame, T_stm stm)
 {
 	assert(frame->name);
@@ -306,6 +308,7 @@ T_stm F_procEntryExit1(F_frame frame, T_stm stm)
 	
 	//return stm; // dummy implementation
 }
+*/
 
 static Temp_tempList returnSink = NULL;
 AS_instrList F_procEntryExit2(AS_instrList body)
@@ -323,7 +326,7 @@ AS_proc F_procEntryExit3(F_frame frame, AS_instrList body)
 	assert(body->head->kind == I_LABEL);
 	string_t fname = body->head->u.LABEL.assem;
 	char *r = checked_malloc(64);
-	sprintf(r, "%%s pushl\t%%ebp\n movl\t%%esp, %%ebp\n subl $64, %%esp\n", fname);
+	sprintf(r, "%s pushl\t%%ebp\n movl\t%%esp, %%ebp\n subl $64, %%esp\n", fname);
 	proc->prolog = r;
 	body = body->tail;
 	proc->body = body;
@@ -332,3 +335,6 @@ AS_proc F_procEntryExit3(F_frame frame, AS_instrList body)
 	//return AS_Proc("prolog", body, "epilog"); // dummy implementation
 }
 
+int F_frameOffset(F_access f) {
+	return f->u.offset;
+}

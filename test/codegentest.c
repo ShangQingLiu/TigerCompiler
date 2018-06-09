@@ -19,6 +19,7 @@
 #include "parse.h"
 #include "codegen.h"
 #include "color.h"
+#include "regalloc.h"
 
 extern bool anyErrors;
 
@@ -37,7 +38,7 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	printStmList(stdout, stmList);
 	/* printStmList(stdout, stmList);*/
 	iList  = F_codegen(frame, stmList); /* 9 */
-<<<<<<< HEAD
+
 	//printf("cg finish: %x\n", iList);
 	//G_graph fg = FG_AssemFlowGraph(iList);
 	//printf("count = %d", fg->nodecount);
@@ -55,25 +56,6 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	fprintf(out, "#END function\n\n");
 
 	//COL_color(lg, NULL, NULL);
-	
-	
-=======
-	printf("cg finish: %x\n", iList);
-
-	while (1) {
-		G_graph fg = FG_AssemFlowGraph(iList);
-		G_show(stdout, fg->mynodes, NULL);
-		printf("flowgraph finish: %x\n", fg);
-		Live_graph lg = Live_liveness(fg);
-		G_show(stdout, lg->graph->mynodes, NULL);
-		printf("livegraph finish: %x\n", lg);
-		coloring = COL_color(lg, NULL, NULL);
-		// if (coloring.spills == NULL) break;
-		// else iList = Rewrite(coloring, iList);
-		break;
-	}
-
->>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
 	//fprintf(out, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
 	//AS_printInstrList (out, iList,
 	//				   Temp_layerMap(F_tempMap,Temp_name()));

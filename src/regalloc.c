@@ -1,5 +1,4 @@
 #include "regalloc.h"
-<<<<<<< HEAD
 #include "assem.h"
 #include "color.h"
 #include "frame.h"
@@ -17,6 +16,15 @@
 
 static void insert_after(AS_instrList il, AS_instr i);
 static void rewrite_inst(Temp_tempList tl, Temp_temp oldt, Temp_temp newt);
+
+static bool inList(Temp_tempList l, Temp_temp t) {
+	Temp_tempList p;
+	for(p=l; p; p=p->tail) {
+		if(p->head == t)
+			return TRUE;
+	}
+	return FALSE;
+}
 
 static void
 insert_after(AS_instrList il, AS_instr i)
@@ -84,21 +92,20 @@ rewrite(Temp_temp spill, AS_instrList il, F_frame f)
         // replace spill with t0.
         buffer = checked_malloc(64);
         rewrite_inst(defs, spill, t0);
-        sprintf(buffer, "\tmovl `s0, %d(%%ebp) #spill\n", inmem->u.offset);
-        insert_after(il, AS_Oper(buffer, NULL, Temp_Templist(t0, NULL), NULL));
+        sprintf(buffer, "mov `s0,%d(%%ebp) #spill\n", F_frameOffset(inmem));
+        insert_after(il, AS_Oper(buffer, NULL, TL(t0, NULL), NULL));
         //printf("%s%d\n", buffer, t0->num);
       }
       if (inuse) {
-
         // load before use.
         buffer = checked_malloc(64);
         rewrite_inst(uses, spill, t0);
-        sprintf(buffer, "\tmovl %d(%%ebp), `d0 #spill\n", inmem->u.offset);
-        insert_after(last, AS_Oper(buffer, Temp_TempList(t0, NULL), NULL, NULL));
+        sprintf(buffer, "movl %d(%%ebp),`d0 #spill\n", F_frameOffset(inmem));
+        insert_after(last, AS_Oper(buffer, TL(t0, NULL), NULL, NULL));
         //printf("%s%d\n", buffer, Temp_num(t0));
       }
 
-      COL_add_newly_created(t0);
+      //COL_add_newly_created(t0);
     }
   }
 }
@@ -106,23 +113,16 @@ rewrite(Temp_temp spill, AS_instrList il, F_frame f)
 static void
 rewrite_programm(Temp_tempList tl, AS_instrList il, F_frame f)
 {
-  Temp_printList(tl);
+  //Temp_printList(tl);
   for (; tl; tl = tl->tail) {
     Temp_temp t = tl->head;
-    printf("Spill temporary:");
-    Temp_print(t);
+    //printf("Spill temporary:");
     rewrite(t, il, f);
-    printf("=======\n");
+    //printf("=======\n");
   }
 }
 
 //
-// MUUUHAHAHAHAHA
-// Last step: delete duplicate moves.
-// I love writing this function~~~
-//
-// Use recursive to end this lab because I'm tired
-// of for(;xx;xx=xx->tail) pattern.
 static AS_instrList
 del_dup_move(AS_instrList il, Temp_map coloring)
 {
@@ -156,8 +156,9 @@ RA_regAlloc(F_frame f, AS_instrList il)
   //newly_created = NULL;
 
   for (; debug < upper; debug++) {
-    G_graph flowgraph = FG_AssemFlowGraph(il, f);
-    struct Live_graph livegraph = Live_liveness(flowgraph);
+	printf("debug = %d\n", debug);
+    G_graph flowgraph = FG_AssemFlowGraph(il);
+    Live_graph livegraph = Live_liveness(flowgraph);
 
     Temp_tempList regs = F_registers();
     struct COL_result cr =  COL_color(livegraph, F_tempMap, regs);
@@ -174,20 +175,4 @@ RA_regAlloc(F_frame f, AS_instrList il)
   il = del_dup_move(il, ret.coloring);
   ret.il = il;
   return ret;
-=======
-#include "color.h"
-#include "graph.h"
-
-struct RA_result RA_regAlloc(F_frame f, AS_instrList il)
-{
-	struct COL_result coloring = COL_color(G_empty(),
-										F_tempMap, F_registers());
-	struct RA_result result = {coloring.coloring, il};
-	return result;
-}
-
-AS_instrList Rewrite(struct COL_result coloring, AS_instrList il)
-{
-	
->>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
 }

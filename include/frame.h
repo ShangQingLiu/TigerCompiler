@@ -81,4 +81,5 @@ AS_instrList F_procEntryExit2(AS_instrList body);
 
 AS_proc F_procEntryExit3(F_frame frame, AS_instrList body);
 
+int F_frameOffset(F_access f); 
 #endif /* TIGER_FRAME_H_ */

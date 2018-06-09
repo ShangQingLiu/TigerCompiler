@@ -18,11 +18,7 @@ void* checked_malloc(int);
 typedef struct list_s *list_t;
 
 struct list_s {
-    union {
-        int i;
-        bool b;
-        void *data;
-    };
+    void *data;
     struct list_s *tail;
 };
 

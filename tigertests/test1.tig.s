@@ -1,2 +1,2 @@
 section .text
-"	Hello, World	.db	"àÁ€"
+"	Hello, World	.db	"€Ât"

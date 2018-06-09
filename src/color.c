@@ -305,6 +305,21 @@ static void preProc(Live_graph lg)
     #endif
 }
 
+static void endProc(Live_graph lg)
+{
+    int i, n = lg->graph->nodecount;
+    AdjMatrix = (char **)checked_malloc(n * sizeof(*AdjMatrix));
+    for (i = 0; i < n; i++)
+    {
+        free(AdjMatrix[i]);
+    }
+    free(AdjMatrix);
+    free(Alias);
+    free(Degree);
+    free(NodeMoves);
+    free(Stack);
+}
+
 static Temp_map AssignColor()
 {
     char colorPad[K+1];
@@ -384,5 +399,7 @@ struct COL_result COL_color(Live_graph lg, Temp_map initial, Temp_tempList regs)
     }
 
     AssignColor(lg);
+
+    endProc(lg);
     printf("colend\n");
 }

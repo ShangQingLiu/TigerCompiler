@@ -30,25 +30,7 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	
 	stmList = C_linearize(body);
 	stmList = C_traceSchedule(C_basicBlocks(stmList));
-	printStmList(stdout, stmList);
-	/* printStmList(stdout, stmList);*/
-	iList  = F_codegen(frame, stmList); /* 9 */
-	printf("cg finish: %x\n", iList);
-	G_graph fg = FG_AssemFlowGraph(iList);
-	
-	printf("flowgraph finish: %x\n", fg);
-	Live_graph lg = Live_liveness(fg);
-	G_show(stdout, lg->graph->mynodes, NULL);
-	printf("livegraph finish: %x\n", lg);
-	
-
-	COL_color(lg, NULL, NULL);
-	
-
-	//fprintf(out, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
-	AS_printInstrList (out, iList,
-					   Temp_layerMap(F_tempMap,Temp_name()));
-	//fprintf(out, "END %s\n\n", Temp_labelstring(F_name(frame)));
+    printStmList(stdout, stmList);
 }
 
 int main(int argc, char *argv[])
@@ -83,7 +65,7 @@ int main(int argc, char *argv[])
 		if (anyErrors) return 1; /* don't continue */
 		
 		/* convert the filename */
-		sprintf(outfile, "%s.s", argv[1]);
+		sprintf(outfile, "./output/%s.s", argv[1]);
 		out = fopen(outfile, "w");
 		/* Chapter 8, 9, 10, 11 & 12 */
 		for (;frags;frags=frags->tail) {
@@ -108,3 +90,4 @@ int main(int argc, char *argv[])
 	EM_error(0,"usage: tiger file.tig");
 	return 1;
 }
+

@@ -73,7 +73,6 @@ G_graph FG_AssemFlowGraph(AS_instrList il)
 		printf("nodes: %x\n", nodes);
 		current = nodes->head;
 		FG_completeEdges(tl, current);
-		printf("nodes after: %x\n", nodes);
 	}
 	return g;
 }

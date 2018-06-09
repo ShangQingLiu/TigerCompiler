@@ -23,6 +23,17 @@ void *checked_realloc(void *p, size_t size)
 	return ptr;
 }
 
+void freeList(list_t l)
+{
+    list_t p;
+    while (l)
+    {
+        p = l;
+        l = l->tail;
+        free(p);
+    }
+}
+
 string_t string(const char *str)
 {
     string_t p = checked_malloc(strlen(str) + 1);
@@ -110,6 +121,7 @@ void addToOrder(void *data, list_t *head)
     assert(head);
     for (p=*head; p; p=p->tail) {
         if (data > p->data) break;
+        else if (data == p->data) return;
         last = p;
     }
     if (last == NULL) {
@@ -131,7 +143,7 @@ void mergeList(list_t *a, list_t *b)
     }
 
     while (pa && pb) {
-        if (pa->data < pb->data) {
+        if (pa->data > pb->data) {
             if (last != NULL) {
                 last->tail = pa;
                 last = pa;
@@ -140,6 +152,19 @@ void mergeList(list_t *a, list_t *b)
             else {
                 last = pa;
                 pa = pa->tail; 
+            }
+        }
+        else if (pa->data == pb->data) {
+            if (last != NULL) {
+                last->tail = pa;
+                last = pa;
+                pa = pa->tail;
+                pb = pb->tail;
+            }
+            else {
+                last = pa;
+                pa = pa->tail;
+                pb = pb->tail;
             }
         }
         else {

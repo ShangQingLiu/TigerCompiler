@@ -27,6 +27,7 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 {
 	T_stmList stmList;
 	AS_instrList iList;
+	struct COL_result coloring;
 	
 	stmList = C_linearize(body);
 	stmList = C_traceSchedule(C_basicBlocks(stmList));
@@ -34,16 +35,19 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	/* printStmList(stdout, stmList);*/
 	iList  = F_codegen(frame, stmList); /* 9 */
 	printf("cg finish: %x\n", iList);
-	G_graph fg = FG_AssemFlowGraph(iList);
-	
-	printf("flowgraph finish: %x\n", fg);
-	Live_graph lg = Live_liveness(fg);
-	G_show(stdout, lg->graph->mynodes, NULL);
-	printf("livegraph finish: %x\n", lg);
-	
 
-	COL_color(lg, NULL, NULL);
-	
+	while (1) {
+		G_graph fg = FG_AssemFlowGraph(iList);
+		G_show(stdout, fg->mynodes, NULL);
+		printf("flowgraph finish: %x\n", fg);
+		Live_graph lg = Live_liveness(fg);
+		G_show(stdout, lg->graph->mynodes, NULL);
+		printf("livegraph finish: %x\n", lg);
+		coloring = COL_color(lg, NULL, NULL);
+		// if (coloring.spills == NULL) break;
+		// else iList = Rewrite(coloring, iList);
+		break;
+	}
 
 	//fprintf(out, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
 	AS_printInstrList (out, iList,

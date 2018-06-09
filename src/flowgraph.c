@@ -46,8 +46,10 @@ G_graph FG_AssemFlowGraph(AS_instrList il)
 	AS_instrList cursor = il;
 	AS_instr instr = NULL;
 	G_node current = NULL, prev = NULL;
+
 	for (; cursor; cursor = cursor->tail) {
 		instr = cursor->head;
+		current = G_Node(g, instr);
 		printf("cursor: %x\n", cursor);
 		switch (instr->kind) {
 			case I_LABEL:
@@ -64,7 +66,7 @@ G_graph FG_AssemFlowGraph(AS_instrList il)
 				break;
 			default: assert(0 && "Invalid instruction kind");
 		}
-		current = G_Node(g, instr);
+		
 		if (prev) G_addEdge(prev, current);
 		prev = current;
 	}

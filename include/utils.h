@@ -23,6 +23,7 @@ struct list_s {
 };
 
 list_t list(void* data, list_t tail);
+void freeList(list_t);
 void addTo(void *data, list_t *head);
 void addToOrder(void *data, list_t *head);
 char deleteFrom(void *data, list_t *head);

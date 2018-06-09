@@ -110,9 +110,11 @@ static struct stmExp do_exp(T_exp exp){
     case T_ESEQ:
       struct stmExp se = do_exp(exp->u.ESEQ.exp);
       return StmExp(reorder(NULL),exp);
+  }
 }
 
-static T_stm do_stm(T_stm stm){
+static T_stm do_stm(T_stm stm)
+{
   switch(stm->kind){
   case T_SEQ:
     return seq(
@@ -135,7 +137,7 @@ static T_stm do_stm(T_stm stm){
       stm->u.MOVE.dst = stm->u.MOVE.dst->u.ESEQ.exp;
       return do_stm(T_Seq(s,stm));
     }
-    // assert(0);
+     assert(0);
   case T_EXP:
       if(stm->u.EXP->kind == T_CALL){
         return seq(reorder(getCallForRlist(stm->u.EXP)),stm);

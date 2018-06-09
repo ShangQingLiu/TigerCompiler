@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "liveness.h"
-
+#include "stdlib.h"
 #define COL_DEBUG
 
 char **AdjMatrix;  // Adjacent matrix
@@ -337,6 +337,8 @@ static Temp_map AssignColor()
         {
             Degree[n->mykey] = 1;
             Temp_enter(mmap, n->info, (string_t)i);
+			printf("%d ", i);
+			printf("%d\n", (int)Temp_look(mmap, n->info));
         }
     }
     return mmap;

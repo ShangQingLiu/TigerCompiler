@@ -48,7 +48,7 @@ G_graph FG_AssemFlowGraph(AS_instrList il)
 	G_node current = NULL, prev = NULL;
 	for (; cursor; cursor = cursor->tail) {
 		instr = cursor->head;
-		printf("cursor: %x\n", cursor);
+		//printf("cursor: %x\n", cursor);
 		switch (instr->kind) {
 			case I_LABEL:
 				// Add label->node mapping so we can retrieve the node
@@ -70,10 +70,10 @@ G_graph FG_AssemFlowGraph(AS_instrList il)
 	}
 	// Complete the edges
 	for (; nodes; nodes = nodes->tail) {
-		printf("nodes: %x\n", nodes);
+		//printf("nodes: %x\n", nodes);
 		current = nodes->head;
 		FG_completeEdges(tl, current);
-		printf("nodes after: %x\n", nodes);
+		//printf("nodes after: %x\n", nodes);
 	}
 	return g;
 }

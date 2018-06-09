@@ -184,7 +184,7 @@ Live_graph Live_liveness(G_graph flow)
 				n2 = G_Node(lg->graph, p2->head);
 				T_enter(tempMap, p2->head, n2);
 			}
-			if(n1 && n2)
+			if(n1 && n2 && n1!=n2)
 				lg->moves = Live_MoveList(n1, n2, lg->moves);
 			continue;
 		}
@@ -202,8 +202,10 @@ Live_graph Live_liveness(G_graph flow)
 					T_enter(tempMap, p2->head, n2);
 				}
 				//bi-direction
-				G_addEdge(n1, n2);
-				G_addEdge(n2, n1);
+				if(n1 != n2) {
+					G_addEdge(n1, n2);
+					G_addEdge(n2, n1);
+				}
 			}
 		}
 	}

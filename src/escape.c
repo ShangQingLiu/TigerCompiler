@@ -67,7 +67,7 @@ static void traverse_decl(dec_t decl)
 
 static void traverse_expr(exp_t expr)
 {
-    list_t p;
+   // list_t p;
 
     switch (expr->kind)
     {
@@ -81,10 +81,12 @@ static void traverse_expr(exp_t expr)
             traverse_var(expr->u.var);
             break;
 
-        case A_callExp:
-            for (p = (list_t)(expr->u.call.args); p; p = p->tail)
-                traverse_expr(p->data);
+        case A_callExp:{
+			expList_t p;
+            for (p = (expr->u.call.args); p; p = p->tail)
+                traverse_expr(p->head);
             break;
+		}
 
         case A_opExp:
             traverse_expr(expr->u.op.left);
@@ -92,19 +94,24 @@ static void traverse_expr(exp_t expr)
             break;
 
         // 记录类型和数组类型的初始化
-        case A_recordExp:
-            for (p = (list_t)(expr->u.record.fields); p; p = p->tail)
-                traverse_expr(((efield_t) p->data)->exp);
+        case A_recordExp:{
+			efieldList_t p;
+            for (p = (expr->u.record.fields); p; p = p->tail)
+                traverse_expr(p->head->exp);
             break;
+		}
+
         case A_arrayExp:
             traverse_expr(expr->u.array.size);
             traverse_expr(expr->u.array.init);
             break;
 
-        case A_seqExp:
-            for (p = (list_t)(expr->u.seq); p; p = p->tail)
-                traverse_expr(p->data);
+        case A_seqExp: {
+			expList_t p;
+            for (p = (expr->u.seq); p; p = p->tail)
+                traverse_expr(p->head);
             break;
+		}
 
         case A_ifExp:
             traverse_expr(expr->u.iff.test);
@@ -129,13 +136,15 @@ static void traverse_expr(exp_t expr)
             SymbolEndScope(_env);
             break;
 
-        case A_letExp:
+        case A_letExp: {
+			decList_t p;
             SymbolBeginScope(_env);
             for (p = expr->u.let.decs; p; p = p->tail)
-                traverse_decl(p->data);
+                traverse_decl(p->head);
             traverse_expr(expr->u.let.body);
             SymbolEndScope(_env);
             break;
+		}
 
         case A_assignExp:
             traverse_var(expr->u.assign.var);
@@ -151,7 +160,7 @@ static void traverse_var(var_t var)
         case A_simpleVar: {
             escape_entry_t entry = SymbolLookup(_env, var->u.simple);
             if (entry && entry->depth < _depth)
-                *entry->escape = 1;
+                *(entry->escape) = TRUE;
             break;
         }
 

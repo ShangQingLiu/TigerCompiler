@@ -25,26 +25,38 @@ extern bool anyErrors;
 /* print the assembly language instructions to filename.s */
 static void doProc(FILE *out, F_frame frame, T_stm body)
 {
+	AS_proc proc;
 	T_stmList stmList;
 	AS_instrList iList;
 	
+	F_tempMap = Temp_empty();
+
 	stmList = C_linearize(body);
 	stmList = C_traceSchedule(C_basicBlocks(stmList));
 	/* printStmList(stdout, stmList);*/
 	iList  = F_codegen(frame, stmList); /* 9 */
-	printf("cg finish: %x\n", iList);
-	G_graph fg = FG_AssemFlowGraph(iList);
-	printf("flowgraph finish: %x\n", fg);
-	Live_graph lg = Live_liveness(fg);
-	printf("livegraph finish: %x\n", lg);
+	//printf("cg finish: %x\n", iList);
+	//G_graph fg = FG_AssemFlowGraph(iList);
+	//printf("count = %d", fg->nodecount);
+	//printf("flowgraph finish: %x\n", fg);
+	//Live_graph lg = Live_liveness(fg);
+	//printf("count = %d", lg->graph->nodecount);
+	//printf("livegraph finish: %x\n", lg);
 	
+	struct RA_result ra = RA_regAlloc(frame, iList);
+	fprintf(out, "#BEGIN function\n");
+	proc = F_procEntryExit3(frame, ra.il);
+	fprintf(out, "%s", proc->prolog);
+	AS_printInstrList(out, proc->body, Temp_layerMap(F_tempMap, ra.coloring)); // uncomment this to continue
+	fprintf(out, "%s", proc->epilog);
+	fprintf(out, "#END function\n\n");
 
-	COL_color(lg, NULL, NULL);
+	//COL_color(lg, NULL, NULL);
 	
 	
 	//fprintf(out, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
-	AS_printInstrList (out, iList,
-					   Temp_layerMap(F_tempMap,Temp_name()));
+	//AS_printInstrList (out, iList,
+	//				   Temp_layerMap(F_tempMap,Temp_name()));
 	//fprintf(out, "END %s\n\n", Temp_labelstring(F_name(frame)));
 }
 

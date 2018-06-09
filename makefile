@@ -25,7 +25,7 @@ PARSER_OBJS = $(patsubst %,$(ODIR)/%,$(PARSER_OBJECTS))
 PARSE_OBJS = $(patsubst %,$(ODIR)/%,$(PARSE_OBJECTS))
 # SEM_OBJS = $(patsubst %,$(ODIR)/%,$(SEM_OBJECTS))
 # STR_OBJS  = $(patsubst %, $(ODIR)/%, $(STR_OBJECTS))
-# TREE_OBJS = $(patsubst %, $(ODIR)/%, $(TREE_OBJECTS))
+TREE_OBJS = $(patsubst %, $(ODIR)/%, $(CG_OBJECTS))
 CG_OBJS = $(patsubst %, $(ODIR)/%, $(CG_OBJECTS))
 
 LEXER_PROG_NAME=$(BDIR)/lextest
@@ -73,13 +73,13 @@ $(ODIR)/codegen.o: $(SDIR)/x86codegen.c
 $(ODIR)/lex.yy.o: $(SDIR)/lex.yy.c
 	$(COMPILER) $(CFLAGS) $@ $<
 
-$(SDIR)/lex.yy.c: $(SDIR)/tiger.l
+#$(SDIR)/lex.yy.c: $(SDIR)/tiger.l
 	# flex -o $(SDIR)/lex.yy.c $<
 
 $(ODIR)/y.tab.o: $(SDIR)/y.tab.c
 	$(COMPILER) $(CFLAGS) $@ $<
 
-$(SDIR)/y.tab.c: $(SDIR)/parser.y
+#$(SDIR)/y.tab.c: $(SDIR)/parser.y
 	# bison -ydvo $@ $<
 
 clean: 

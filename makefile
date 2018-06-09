@@ -1,5 +1,5 @@
-a.out: parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o frame.o temp.o assem.o
-	gcc -g parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o frame.o temp.o assem.o
+a.out: parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o frame.o temp.o assem.o flowgraph.o liveness.o color.o graph.o escape.o canonical.o
+	gcc -g parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o frame.o temp.o assem.o flowgraph.o liveness.o color.o graph.o escape.o canonical.o
 
 parsetest.o: parsetest.c errormsg.h utils.h past.h
 	gcc -g -c parsetest.c
@@ -58,12 +58,29 @@ utils.o: utils.c utils.h
 frame.o: x86frame.c frame.h
 	gcc -g -c x86frame.c -o frame.o
 
-
 temp.o: temp.c temp.h
 	gcc -g -c temp.c
 
 assem.o: assem.c assem.h
 	gcc -g -c assem.c
+
+flowgraph.o: flowgraph.c flowgraph.h
+	gcc -g -c flowgraph.c
+
+liveness.o: liveness.c liveness.h
+	gcc -g -c liveness.c
+
+color.o: color.c color.h
+	gcc -g -c color.c
+
+graph.o: graph.c graph.h
+	gcc -g -c graph.c
+
+escape.o: escape.c escape.h
+	gcc -g -c escape.c
+
+canonical.o: canonical.c canonical.h
+	gcc -g -c canonical.c
 
 clean: 
 	rm -f a.out utils.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o

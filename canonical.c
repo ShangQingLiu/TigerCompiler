@@ -17,11 +17,11 @@ static T_stmList getNext(void);
 
 
 static bool isNop(T_stm x){
-  return x->kind == T_Exp && x->u.EXP->kind == T_Const;
+  return x->kind == T_EXP && x->u.EXP->kind == T_CONST;
 }
 /*判别语句是否可与表达式交换*/
 static bool commute(T_stm x, T_exp y){
-  return isNop(x) || y->kind == T_Name || y->kind == T_Const;
+  return isNop(x) || y->kind == T_NAME || y->kind == T_CONST;
 }
 
 /*返回一个等价SEQ(s1,s2), 但如果其中一个为空就直接
@@ -57,8 +57,8 @@ static T_stm reorder(expRefList rlist){
   if(!rlist)//空
     return T_Exp(T_Const(0));
   else if((*rlist->head)->kind == T_CALL){
-    Temp_temp t = temp();
-    *rlist->head = T_Eseq(T_MOVE(T_Temp(t),*rlist->head),T_Temp(t));
+    Temp_temp t = Temp_newtemp();
+    *rlist->head = T_Eseq(T_Move(T_Temp(t),*rlist->head),T_Temp(t));
     return reorder(rlist);
   }
   else{
@@ -69,9 +69,9 @@ static T_stm reorder(expRefList rlist){
       return seq(se.s,s);
     }
     else{
-      Temp_temp tt = temp();
+      Temp_temp tt = Temp_newtemp();
       *rlist->head = T_Temp(tt);
-      return seq(se.s,seq(T_MOVE(T_Temp(tt),se.e),s));
+      return seq(se.s,seq(T_Move(T_Temp(tt),se.e),s));
     }
   }
 }
@@ -123,7 +123,7 @@ static T_stm do_stm(T_stm stm){
     return seq(reorder(ExpRefList(&stm->u.JUMP.exp,NULL)),stm);
   case T_CJUMP:
     return seq(reorder(ExpRefList(&stm->u.CJUMP.left,ExpRefList(&stm->u.CJUMP.right,NULL))),stm);
-  case T_ MOVE:
+  case T_MOVE:
     if(stm->u.MOVE.dst->kind ==T_TEMP && stm->u.MOVE.src->kind == T_CALL)
       return seq(reorder(getCallForRlist(stm->u.MOVE.src)),stm);
     else if(stm->u.MOVE.dst->kind == T_TEMP)
@@ -138,7 +138,7 @@ static T_stm do_stm(T_stm stm){
     // assert(0);
   case T_EXP:
       if(stm->u.EXP->kind == T_CALL){
-        return seq(reorder(getCallForRlist(stm->u.EXP,NULL)),stm);
+        return seq(reorder(getCallForRlist(stm->u.EXP)),stm);
       }
       else
         return seq(reorder(ExpRefList(&stm->u.EXP,NULL)),stm);
@@ -148,7 +148,7 @@ static T_stm do_stm(T_stm stm){
 }
 
 /*get rid of SEQ's ouput list*/
-static T_stmList linear (T_stm stm, T_stmListRight)
+static T_stmList linear (T_stm stm, T_stmList right)
 {
   if(stm->kind == T_SEQ){
     return linear(stm->u.SEQ.left, linear(stm->u.SEQ.right,right));
@@ -157,7 +157,7 @@ static T_stmList linear (T_stm stm, T_stmListRight)
     return T_StmList(stm,right);
 }
 
-T_stmlist C_linearize(T_stm stm){
+T_stmList C_linearize(T_stm stm){
   return linear(do_stm(stm),NULL);
 }
 
@@ -180,10 +180,10 @@ static C_stmListList next(T_stmList prestms, T_stmList stms, Temp_label done){
     stms->tail = NULL;
     return sl;
   }
-  else if(stms->head->kind == T_Label){
+  else if(stms->head->kind == T_LABEL){
     Temp_label lab = stms->head->u.LABEL;
     return next(prestms, T_StmList(
-      T_JUMP(T_NAME(lab),Temp_LabelList(lab,NULL)),stms
+      T_Jump(T_Name(lab),Temp_LabelList(lab,NULL)),stms
     ),done); 
   }
   else{
@@ -215,7 +215,7 @@ struct C_block C_basicBlocks(T_stmList stmList)
 	return b;
 }
 
-static S_table block_env;
+static table_t block_env;
 static struct C_block global_block;
 
 static T_stmList getLast(T_stmList list)
@@ -243,8 +243,8 @@ static void trace(T_stmList list)
 	}
 	/* we want false label to follow CJUMP */
 	else if (s->kind == T_CJUMP) {
-		T_stmList true = (T_stmList)S_look(block_env, s->u.CJUMP.true);
-		T_stmList false = (T_stmList)S_look(block_env, s->u.CJUMP.false);
+		T_stmList true = (T_stmList)SymbolLookup(block_env, s->u.CJUMP.true);
+		T_stmList false = (T_stmList)SymbolLookup(block_env, s->u.CJUMP.false);
 		if (false) {
 			last->tail->tail = false;
 			trace(false);
@@ -270,7 +270,7 @@ static T_stmList getNext()
 		return T_StmList(T_Label(global_block.label), NULL);
 	else {
 		T_stmList s = global_block.stmLists->head;
-		if (S_look(block_env, s->head->u.LABEL)) {	/* label exists in the table */
+		if (SymbolLookup(block_env, s->head->u.LABEL)) {	/* label exists in the table */
 			trace(s);
 			return s;
 		} else {
@@ -292,11 +292,11 @@ static T_stmList getNext()
 T_stmList C_traceSchedule(struct C_block b)
 {
 	C_stmListList sList;
-	block_env = S_empty();
+	block_env = SymbolEmpty();
 	global_block = b;
 
 	for (sList = global_block.stmLists; sList; sList = sList->tail) {
-		S_enter(block_env, sList->head->head->u.LABEL, sList->head);
+		SymbolEnter(block_env, sList->head->head->u.LABEL, sList->head);
 	}
 
 	return getNext();

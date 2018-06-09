@@ -32,13 +32,13 @@ static void traverse_decl(dec_t decl)
     {
         case A_functionDec: {
             fundecList_t p = decl->u.function;
-            for (; p; p = p->next)
+            for (; p; p = p->tail)
             {
-                fundec_t func = p->data;
+                fundec_t func = p->head;
                 fieldList_t q;
 
                 _depth++;
-                sym_begin_scope(_env);
+                SymbolBeginScope(_env);
                 for (q = func->params; q; q = q->tail)
                 {
                     field_t field = q->head;
@@ -47,7 +47,7 @@ static void traverse_decl(dec_t decl)
                               escape_entry(_depth, &field->escape));
                 }
                 traverse_expr(func->body);
-                sym_end_scope(_env);
+                SymbolEndScope(_env);
                 _depth--;
             }
             break;
@@ -82,8 +82,8 @@ static void traverse_expr(exp_t expr)
             break;
 
         case A_callExp:
-            for (p = expr->u.call.args; p; p = p->next)
-                traverse_expr((exp_t)(p->data));
+            for (p = (list_t)(expr->u.call.args); p; p = p->tail)
+                traverse_expr(p->data);
             break;
 
         case A_opExp:
@@ -93,7 +93,7 @@ static void traverse_expr(exp_t expr)
 
         // 记录类型和数组类型的初始化
         case A_recordExp:
-            for (p = expr->u.record.fields; p; p = p->next)
+            for (p = (list_t)(expr->u.record.fields); p; p = p->tail)
                 traverse_expr(((efield_t) p->data)->exp);
             break;
         case A_arrayExp:
@@ -102,7 +102,7 @@ static void traverse_expr(exp_t expr)
             break;
 
         case A_seqExp:
-            for (p = expr->u.seq; p; p = p->next)
+            for (p = (list_t)(expr->u.seq); p; p = p->tail)
                 traverse_expr(p->data);
             break;
 
@@ -110,7 +110,7 @@ static void traverse_expr(exp_t expr)
             traverse_expr(expr->u.iff.test);
             traverse_expr(expr->u.iff.then);
             if (expr->u.iff.elsee)
-                traverse_expr(expr->u.ife.elsee);
+                traverse_expr(expr->u.iff.elsee);
             break;
 
         case A_whileExp:
@@ -121,20 +121,20 @@ static void traverse_expr(exp_t expr)
         case A_forExp:
             traverse_expr(expr->u.forr.lo);
             traverse_expr(expr->u.forr.hi);
-            sym_begin_scope(_env);
+            SymbolBeginScope(_env);
             SymbolEnter(_env,
                       expr->u.forr.var,
                       escape_entry(_depth, &expr->u.forr.escape));
             traverse_expr(expr->u.forr.body);
-            sym_end_scope(_env);
+            SymbolEndScope(_env);
             break;
 
         case A_letExp:
-            sym_begin_scope(_env);
-            for (p = expr->u.let.decs; p; p = p->next)
+            SymbolBeginScope(_env);
+            for (p = expr->u.let.decs; p; p = p->tail)
                 traverse_decl(p->data);
             traverse_expr(expr->u.let.body);
-            sym_end_scope(_env);
+            SymbolEndScope(_env);
             break;
 
         case A_assignExp:
@@ -148,21 +148,21 @@ static void traverse_var(var_t var)
 {
     switch (var->kind)
     {
-        case AST_SIMPLE_VAR: {
-            escape_entry_t entry = sym_lookup(_env, var->u.simple);
+        case A_simpleVar: {
+            escape_entry_t entry = SymbolLookup(_env, var->u.simple);
             if (entry && entry->depth < _depth)
-                *entry->escape = true;
+                *entry->escape = 1;
             break;
         }
 
-        case AST_FIELD_VAR:
+        case A_fieldVar:
             traverse_var(var->u.field.var);
             break;
 
-        case AST_SUB_VAR:
+        case A_subscriptVar:
             // 数组类型？
-            traverse_var(var->u.sub.var);
-            traverse_expr(var->u.sub.sub);            
+            traverse_var(var->u.subscript.var);
+            traverse_expr(var->u.subscript.exp);            
             break;
     }
 }
@@ -170,6 +170,6 @@ static void traverse_var(var_t var)
 void Esc_findEscape(exp_t expr)
 {
     _depth = 0;
-    _env = sym_empty();
+    _env = SymbolEmpty();
     traverse_expr(expr);
 }

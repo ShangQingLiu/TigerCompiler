@@ -74,7 +74,7 @@ G_nodeList G_adj(G_node n);
 void *G_nodeInfo(G_node n);
 
 /* The type of "tables" mapping graph-nodes to information */
-typedef struct TAB_table_  *G_table;
+typedef table_t G_table;
 
 /* Make a new table */
 G_table G_empty(void);

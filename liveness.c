@@ -217,13 +217,13 @@ Temp_temp Live_gtemp(G_node node)
 }
 
 T_table T_empty() {
-	return TAB_empty();
+	return TableEmpty();
 }
 
 void T_enter(T_table t, Temp_temp temp, G_node node) {
-	TAB_enter(t, temp, node);
+	TableEnter(t, temp, node);
 }
 
 G_node T_look(T_table t, Temp_temp temp) {
-	return (G_node)TAB_look(t, temp);
+	return (G_node)TableLookup(t, temp);
 }

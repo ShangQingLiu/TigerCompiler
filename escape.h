@@ -3,6 +3,6 @@
 
 #include "ast.h"
 
-void Esc_findEscape(A_exp exp);
+void Esc_findEscape(exp_t exp);
 
 #endif /* _ESCAPE_H_ */

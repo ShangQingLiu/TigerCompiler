@@ -2,7 +2,7 @@
 2018 Courses Design
 Reference book "Modern Compiler Implementation in C".
 The structure of whole TigerCompiler. (Order in desigh step)
-`‵`
+```
 |-ch1
   |--util---常用工具函数集
 |-ch2
@@ -35,3 +35,4 @@ The structure of whole TigerCompiler. (Order in desigh step)
   |--liveness---活跃分析
 |-ch11
   |--color---生成冲突使用George合并然后计算溢出，如果溢出就将溢出节点聚集，最后要重新进行一次新的着色
+```

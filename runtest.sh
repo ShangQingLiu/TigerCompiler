@@ -1,0 +1,1 @@
+./bin/codegentest.exe ./tigertests/queens.tig

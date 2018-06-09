@@ -1,86 +1,87 @@
-a.out: parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o frame.o temp.o assem.o flowgraph.o liveness.o color.o graph.o escape.o canonical.o
-	gcc -g parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o frame.o temp.o assem.o flowgraph.o liveness.o color.o graph.o escape.o canonical.o
+IDIR =./include
+SDIR =./src
+TESTDIR=./test
+ODIR =./obj
+BDIR =./bin
 
-parsetest.o: parsetest.c errormsg.h utils.h past.h
-	gcc -g -c parsetest.c
+COMPILER=gcc
+CFLAGS=-I$(IDIR) -g -c -o
+OPTIONS=-o
 
-y.tab.o: y.tab.c
-	gcc -g -c y.tab.c
+PARSE_OBJECTS = parsetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o \
+symbol.o table.o utils.o
 
-y.tab.c: parser.y
-	# bison -dv parser.y
+SEM_OBJECTS = semantest.o y.tab.o lex.yy.o errormsg.o ast.o past.o\
+symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o \
+frame.o temp.o escape.o
 
-y.tab.h: y.tab.c
-	echo "y.tab.h was created at the same time as y.tab.c"
+CG_OBJECTS = codegentest.o y.tab.o lex.yy.o errormsg.o ast.o past.o \
+symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o \
+frame.o temp.o assem.o flowgraph.o liveness.o color.o graph.o \
+escape.o canonical.o codegen.o
 
-errormsg.o: errormsg.c errormsg.h utils.h
-	gcc -g -c errormsg.c
+# LEXER_OBJS = $(patsubst %,$(ODIR)/%,$(LEXER_OBJECTS))
+PARSER_OBJS = $(patsubst %,$(ODIR)/%,$(PARSER_OBJECTS))
+PARSE_OBJS = $(patsubst %,$(ODIR)/%,$(PARSE_OBJECTS))
+# SEM_OBJS = $(patsubst %,$(ODIR)/%,$(SEM_OBJECTS))
+# STR_OBJS  = $(patsubst %, $(ODIR)/%, $(STR_OBJECTS))
+# TREE_OBJS = $(patsubst %, $(ODIR)/%, $(TREE_OBJECTS))
+CG_OBJS = $(patsubst %, $(ODIR)/%, $(CG_OBJECTS))
 
-lex.yy.o: lex.yy.c y.tab.h errormsg.h utils.h ast.h
-	gcc -g -c lex.yy.c
+LEXER_PROG_NAME=$(BDIR)/lextest
+PARSER_PROG_NAME=$(BDIR)/parsertest
+PARSE_PROG_NAME=$(BDIR)/parsetest
+SEM_PROG_NAME=$(BDIR)/semantest
+STR_PROG_NAME=$(BDIR)/stringtest
+TREE_PROG_NAME=$(BDIR)/treetest
+PROG_NAME=$(BDIR)/codegentest
 
-# lex.yy.c: ref_tiger.lex
-# 	lex ref_tiger.lex
+all: $(CG_OBJS)
+	$(COMPILER) $^ $(OPTIONS) $(PROG_NAME)
 
-lex.yy.c: tiger.l
-	flex tiger.l lex.yy.c
+treetest: $(TREE_OBJS)
+	$(COMPILER) $^ $(OPTIONS) $(TREE_PROG_NAME)
+	
+parsetest: $(PARSE_OBJS)
+	$(COMPILER) $^ $(OPTIONS) $(PARSE_PROG_NAME)
+	
+stringtest: $(STR_OBJS)
+	$(COMPILER) $^ $(OPTIONS) $(STR_PROG_NAME)
+	
+semantest: $(SEM_OBJS)
+	$(COMPILER) $^ $(OPTIONS) $(SEM_PROG_NAME)
 
-past.o: past.c past.h
-	gcc -g -c past.c
+parsertest: $(PARSER_OBJS)
+	$(COMPILER) $^ $(OPTIONS) $(PARSER_PROG_NAME)
+	
+lextest: $(LEXER_OBJS)
+	$(COMPILER) $^ $(OPTIONS) $(LEXER_PROG_NAME)
 
-tree.o: tree.c tree.h
-	gcc -g -c tree.c
+$(ODIR)/%.o: $(SDIR)/%.c
+	$(COMPILER) $(CFLAGS) $@ $<
+	
+$(ODIR)/%.o: $(TESTDIR)/%.c
+	$(COMPILER) $(CFLAGS) $@ $<
 
-translate.o: translate.c translate.h ast.h
-	gcc -g -c translate.c
+$(ODIR)/frame.o: $(SDIR)/x86frame.c
+	$(COMPILER) $(CFLAGS) $@ $<
+	
+$(ODIR)/codegen.o: $(SDIR)/x86codegen.c
+	$(COMPILER) $(CFLAGS) $@ $<
 
-types.o: types.c types.h
-	gcc -g -c types.c
 
-env.o: env.c env.h
-	gcc -g -c env.c
+$(ODIR)/lex.yy.o: $(SDIR)/lex.yy.c
+	$(COMPILER) $(CFLAGS) $@ $<
 
-semant.o: semant.c semant.h
-	gcc -g -c semant.c
+$(SDIR)/lex.yy.c: $(SDIR)/tiger.l
+	# flex -o $(SDIR)/lex.yy.c $<
 
-ast.o: ast.c ast.h
-	gcc -g -c ast.c
+$(ODIR)/y.tab.o: $(SDIR)/y.tab.c
+	$(COMPILER) $(CFLAGS) $@ $<
 
-symbol.o: symbol.c symbol.h
-	gcc -g -c symbol.c
-
-table.o: table.c table.h
-	gcc -g -c table.c
-
-utils.o: utils.c utils.h
-	gcc -g -c utils.c
-
-frame.o: x86frame.c frame.h
-	gcc -g -c x86frame.c -o frame.o
-
-temp.o: temp.c temp.h
-	gcc -g -c temp.c
-
-assem.o: assem.c assem.h
-	gcc -g -c assem.c
-
-flowgraph.o: flowgraph.c flowgraph.h
-	gcc -g -c flowgraph.c
-
-liveness.o: liveness.c liveness.h
-	gcc -g -c liveness.c
-
-color.o: color.c color.h
-	gcc -g -c color.c
-
-graph.o: graph.c graph.h
-	gcc -g -c graph.c
-
-escape.o: escape.c escape.h
-	gcc -g -c escape.c
-
-canonical.o: canonical.c canonical.h
-	gcc -g -c canonical.c
+$(SDIR)/y.tab.c: $(SDIR)/parser.y
+	# bison -ydvo $@ $<
 
 clean: 
-	rm -f a.out utils.o parsetest.o lex.yy.o errormsg.o y.tab.c y.tab.h y.tab.o
+	rm -f $(ODIR)/*.o $(LEXER_PROG_NAME) $(PARSER_PROG_NAME) $(PARSE_PROG_NAME) \
+		$(SEM_PROG_NAME) $(STR_PROG_NAME) $(TREE_PROG_NAME) $(PROG_NAME)

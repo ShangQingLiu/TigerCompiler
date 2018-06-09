@@ -1,10 +1,14 @@
-/*
- * Implementation of frame interface for Intel x86 architecture
- * using Intel® 64 and IA-32 Architectures Software Developer’s Manual
- *
- * Created by Craig McL on 2/6/2012
- */
 #include "frame.h"
+
+#define REGDEC(name)
+	statc Temp_temp name()\
+	{\
+		static Temp_temp name = NULL;\
+		if(!name) {\
+			name = Temp_newtemp();\
+		}\
+		return name;\
+	}
 
 struct F_access_ {
 	enum { inFrame, inReg } kind;
@@ -22,6 +26,13 @@ struct F_frame_ {
 	int local_count;
 	/* instructions required to implement the "view shift" needed */
 };
+
+REGDEC(eax);
+REGDEC(ebx);
+REGDEC(ecx);
+REGDEC(esi);
+REGDEC(edi);
+REGDEC(ebp);
 
 static F_access InFrame(int offset);
 static F_access InReg(Temp_temp reg);
@@ -275,7 +286,25 @@ T_exp F_externalCall(string_t str, T_expList args)
 
 T_stm F_procEntryExit1(F_frame frame, T_stm stm)
 {
-	return stm; // dummy implementation
+	assert(frame->name);
+	bool tostack = FALSE;
+	F_access f_ebx = F_allocLocal(frame, tostack);
+	F_access f_esi = F_allocLocal(frame, tostack);
+	F_access f_edi = F_allocLocal(frame, tostack);
+
+	T_stm rstr;
+	rstr = T_Move(T_Temp(ebx()), F_Exp(f_ebx, T_Temp(F_FP())));
+	rstr = T_Seq(T_Move(T_Temp(esi()), F_Exp(f_esi, T_Temp(F_FP()))), rstr);	
+	rstr = T_Seq(T_Move(T_Temp(edi()), F_Exp(f_esi, T_Temp(F_FP()))), rstr);
+
+	T_stm save = T_Seq(stm, rstr);
+	save = T_seq(T_Move(F_exp(f_ebx, T_Temp(F_FP())), T_Temp(ebx())), save);
+	save = T_seq(T_Move(F_exp(f_esi, T_Temp(F_FP())), T_Temp(esi())), save);
+	save = T_seq(T_Move(F_exp(f_edi, T_Temp(F_FP())), T_Temp(edi())), save);
+
+	return T_Seq(T_Label(frame->name), save);
+	
+	//return stm; // dummy implementation
 }
 
 static Temp_tempList returnSink = NULL;
@@ -290,6 +319,16 @@ AS_instrList F_procEntryExit2(AS_instrList body)
 
 AS_proc F_procEntryExit3(F_frame frame, AS_instrList body)
 {
-	return AS_Proc("prolog", body, "epilog"); // dummy implementation
+	AS_proc proc = checked_malloc(sizeof(*proc));
+	assert(body->head->kind == I_LABEL);
+	string_t fname = body->head->u.LABEL.assem;
+	char *r = checked_malloc(64);
+	sprintf(r, "%%s pushl\t%%ebp\n movl\t%%esp, %%ebp\n subl $64, %%esp\n", fname);
+	proc->prolog = r;
+	body = body->tail;
+	proc->body = body;
+	proc->epilog = "\t leave\n\tret\n";
+	return proc;
+	//return AS_Proc("prolog", body, "epilog"); // dummy implementation
 }
 

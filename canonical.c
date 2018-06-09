@@ -94,6 +94,7 @@ static struct stmExp StmExp(T_stm stm, T_exp exp){
 }
 
 static struct stmExp do_exp(T_exp exp){
+struct stmExp se ;
   switch(exp->kind){
     case T_BINOP:
       return StmExp(
@@ -144,8 +145,8 @@ static T_stm do_stm(T_stm stm)
       }
       else
         return seq(reorder(ExpRefList(&stm->u.EXP,NULL)),stm);
-      default:
-        return stm;
+  default:
+      return stm;
  }
 }
 

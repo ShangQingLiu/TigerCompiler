@@ -1,5 +1,5 @@
 #include "semant.h"
-#include "util.h"
+#include "utils.h"
 #include "errormsg.h"
 #include "env.h"
 #include <assert.h>
@@ -7,7 +7,7 @@
 
 /* prototypes for functions local to this module */
 static struct expty transExp(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, exp_t a);
-static struct expty transVar(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, A_var v);
+static struct expty transVar(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, var_t v);
 static Tr_exp transDec(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, dec_t d);
 static Type_t transTy(table_t tenv, ty_t t);
 static struct expty expTy(Tr_exp exp, Type_t ty);
@@ -91,7 +91,7 @@ static struct expty transExp(Tr_level level, table_t venv, table_t tenv, Tr_exp 
 		}
 		case A_stringExp:
 		{
-			return expTy(Tr_stringExp(a->u.stringg), NewTyString());
+			return expTy(Tr_stringExp(a->u.string), NewTyString());
 		}
 		case A_callExp:
 		{
@@ -222,12 +222,12 @@ static struct expty transExp(Tr_level level, table_t venv, table_t tenv, Tr_exp 
 			Type_t typ = S_look_ty(tenv, a->u.record.typ);
 			if (!typ) {
 				EM_error(a->pos, "undefined type");
-				return expTy(Tr_noExp(), Ty_Record(NULL));
+				return expTy(Tr_noExp(), NewTyRecord(NULL));
 			}
 			if (typ->kind != Ty_record)
 				EM_error(a->pos, "%s is not a record type", SymbolName(a->u.record.typ));
 			Ty_fieldList fieldTys = typ->u.record;
-			A_efieldList recList;
+			efieldList_t recList;
 			Tr_expList list = Tr_ExpList();
 			int n = 0;
 			for (recList = a->u.record.fields; recList;
@@ -298,30 +298,30 @@ static struct expty transExp(Tr_level level, table_t venv, table_t tenv, Tr_exp 
 		case A_forExp:
 		{
 			/* Convert a for loop into a let expression with a while loop */
-			dec_t i = A_VarDec(a->pos, a->u.forr.var, NULL, a->u.forr.lo);
-			dec_t limit = A_VarDec(a->pos, Symbol("limit"), NULL, a->u.forr.hi);
-			dec_t test = A_VarDec(a->pos, Symbol("test"), NULL, A_IntExp(a->pos, 1));
-			exp_t testExp = A_VarExp(a->pos, A_SimpleVar(a->pos, Symbol("test")));
-			exp_t iExp = A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var));
-			exp_t limitExp = A_VarExp(a->pos, A_SimpleVar(a->pos, Symbol("limit")));
-			exp_t increment = A_AssignExp(a->pos, 
-				A_SimpleVar(a->pos, a->u.forr.var),
-				A_OpExp(a->pos, A_plusOp, iExp, A_IntExp(a->pos, 1)));
-			exp_t setFalse = A_AssignExp(a->pos, 
-				A_SimpleVar(a->pos, Symbol("test")), A_IntExp(a->pos, 0));
+			dec_t i = VarDec(a->pos, a->u.forr.var, NULL, a->u.forr.lo);
+			dec_t limit = VarDec(a->pos, Symbol("limit"), NULL, a->u.forr.hi);
+			dec_t test = VarDec(a->pos, Symbol("test"), NULL, IntExp(a->pos, 1));
+			exp_t testExp = VarExp(a->pos, SimpleVar(a->pos, Symbol("test")));
+			exp_t iExp = VarExp(a->pos, SimpleVar(a->pos, a->u.forr.var));
+			exp_t limitExp = VarExp(a->pos, SimpleVar(a->pos, Symbol("limit")));
+			exp_t increment = AssignExp(a->pos, 
+				SimpleVar(a->pos, a->u.forr.var),
+				OpExp(a->pos, A_plusOp, iExp, IntExp(a->pos, 1)));
+			exp_t setFalse = AssignExp(a->pos, 
+				SimpleVar(a->pos, Symbol("test")), IntExp(a->pos, 0));
 			/* The let expression we pass to this function */
-			exp_t letExp = A_LetExp(a->pos, 
-				A_DecList(i, A_DecList(limit, A_DecList(test, NULL))),
-				A_SeqExp(a->pos,
-					expList_t(
-						A_IfExp(a->pos,
-							A_OpExp(a->pos, A_leOp, a->u.forr.lo, a->u.forr.hi),
-							A_WhileExp(a->pos, testExp,
-								A_SeqExp(a->pos, 
-									expList_t(a->u.forr.body,
-										expList_t(
-											A_IfExp(a->pos, 
-												A_OpExp(a->pos, A_ltOp, iExp, 
+			exp_t letExp = LetExp(a->pos, 
+				DecList(i, DecList(limit, DecList(test, NULL))),
+				SeqExp(a->pos,
+					ExpList(
+						IfExp(a->pos,
+							OpExp(a->pos, A_leOp, a->u.forr.lo, a->u.forr.hi),
+							WhileExp(a->pos, testExp,
+								SeqExp(a->pos, 
+									ExpList(a->u.forr.body,
+										ExpList(
+											IfExp(a->pos, 
+												OpExp(a->pos, A_ltOp, iExp, 
 													limitExp),
 												increment, setFalse), 
 											NULL)))), 
@@ -343,7 +343,7 @@ static struct expty transExp(Tr_level level, table_t venv, table_t tenv, Tr_exp 
 		case A_letExp:
 		{
 			struct expty expr;
-			A_decList d;
+			decList_t d;
 			Tr_expList list = Tr_ExpList();
 			SymbolBeginScope(venv);
 			SymbolBeginScope(tenv);
@@ -380,7 +380,7 @@ static struct expty transExp(Tr_level level, table_t venv, table_t tenv, Tr_exp 
 }
 
 // Translate variable
-static struct expty transVar(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, A_var v)
+static struct expty transVar(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, var_t v)
 {
 	switch(v->kind) {
 		case A_simpleVar:
@@ -440,7 +440,7 @@ static Tr_exp transDec(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk
 	switch (d->kind) {
 		case A_functionDec:
 		{
-			A_fundecList funList;
+			fundecList_t funList;
 			Ty_tyList formalTys;
 			U_boolList formals;
 			Type_t resultTy;
@@ -517,11 +517,11 @@ static Tr_exp transDec(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk
 		}
 		case A_typeDec:
 		{
-			A_nametyList nameList;
+			nametyList_t nameList;
 			bool isCyclic = TRUE; /* Illegal cycle in type list */
 			/* "headers" first */
 			for (nameList = d->u.type; nameList; nameList = nameList->tail)
-				SymbolEnter(tenv, nameList->head->name, Ty_Name(nameList->head->name, NULL));
+				SymbolEnter(tenv, nameList->head->name, NewTyName(nameList->head->name, NULL));
 			/* now we can process the (possibly mutually) recursive bodies */
 			for (nameList = d->u.type; nameList; nameList = nameList->tail) {
 				Type_t t = transTy(tenv, nameList->head->ty);
@@ -548,26 +548,26 @@ static Type_t transTy(table_t tenv, ty_t t)
 	switch (t->kind) {
 		case A_nameTy:
 		{
-			ty = SymbolLookup(tenv, t->u.name);
+			ty = SymbolLookup(tenv, t->u.var);
 			if (!ty) {
 				EM_error(t->pos, "undefined type %s",
-					SymbolName(t->u.name));
+					SymbolName(t->u.var));
 			}
 			return ty;
 		}
 		case A_recordTy:
 		{
 			Ty_fieldList fieldTys = makeFieldTys(tenv, t->u.record);
-			return Ty_Record(fieldTys);
+			return NewTyRecord(fieldTys);
 		}
 		case A_arrayTy:
 		{
-			ty = SymbolLookup(tenv, t->u.name);
+			ty = SymbolLookup(tenv, t->u.var);
 			if (!ty) {
 				EM_error(t->pos, "undefined type %s",
-					SymbolName(t->u.name));
+					SymbolName(t->u.var));
 			}
-			return Ty_Array(ty);
+			return NewTyArray(ty);
 		}
 	}
 	assert(0);
@@ -592,10 +592,10 @@ static Ty_tyList makeFormalTys(table_t tenv, fieldList_t params)
 				SymbolName(paramList->head->typ));
 		} else {
 			if (paramTys) {
-				tailList->tail = Ty_TyList(t, NULL);
+				tailList->tail = NewTyList(t, NULL);
 				tailList = tailList->tail;
 			} else {
-				paramTys = Ty_TyList(t, NULL);
+				paramTys = NewTyList(t, NULL);
 				tailList = paramTys;
 			}
 		}
@@ -638,12 +638,12 @@ static Ty_fieldList makeFieldTys(table_t tenv, fieldList_t fields)
 			EM_error(fieldList->head->pos, "undefined type %s",
 				SymbolName(fieldList->head->typ));
 		} else {
-			Ty_field f = Ty_Field(fieldList->head->name, t);
+			Ty_field f = NewTyField(fieldList->head->name, t);
 			if (fieldTys) {
-				tailList->tail = Ty_FieldList(f, NULL);
+				tailList->tail = NewFieldList(f, NULL);
 				tailList = tailList->tail;
 			} else {
-				fieldTys = Ty_FieldList(f, NULL);
+				fieldTys = NewFieldList(f, NULL);
 				tailList = fieldTys;
 			}
 		}

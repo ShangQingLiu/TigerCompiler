@@ -4,11 +4,11 @@
  */
 
 #include <stdio.h>
-#include "util.h"
+#include "utils.h"
 #include "symbol.h"
 #include "temp.h"
 #include "tree.h"
-#include "absyn.h"
+#include "ast.h"
 #include "assem.h"
 #include "frame.h"
 #include "graph.h"
@@ -143,17 +143,17 @@ void *G_nodeInfo(G_node n) {return n->info;}
 /* G_node table functions */
 
 G_table G_empty(void) {
-  return TAB_empty();
+  return TableEmpty();
 }
 
 void G_enter(G_table t, G_node node, void *value)
 {
-  TAB_enter(t, node, value);
+  TableEnter(t, node, value);
 }
 
 void *G_look(G_table t, G_node node)
 {
-  return TAB_look(t, node);
+  return TableLookup(t, node);
 }
 
 

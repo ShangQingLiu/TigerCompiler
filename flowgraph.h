@@ -5,6 +5,7 @@
  */
 #include "graph.h"
 #include "temp.h"
+#include "assem.h"
 
 Temp_tempList FG_def(G_node n);
 Temp_tempList FG_use(G_node n);

@@ -1,8 +1,8 @@
 #ifndef TIGER_TRANSLATE_H_
 #define TIGER_TRANSLATE_H_
 
-#include "absyn.h"
-#include "util.h"
+#include "ast.h"
+#include "utils.h"
 #include "temp.h"
 #include "frame.h"
 
@@ -100,7 +100,7 @@ Tr_exp Tr_eqStringExp(A_oper op, Tr_exp left, Tr_exp right);
 Tr_exp Tr_eqRef(A_oper op, Tr_exp left, Tr_exp right);
 
 Tr_exp Tr_callExp(Tr_level level, Tr_level funLevel, Temp_label funLabel, Tr_expList argList);
-Tr_exp Tr_stringExp(string str);
+Tr_exp Tr_stringExp(string_t str);
 Tr_exp Tr_intExp(int n);
 Tr_exp Tr_nilExp(void); /* provisional */
 Tr_exp Tr_noExp(void);

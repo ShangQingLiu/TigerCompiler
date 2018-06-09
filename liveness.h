@@ -21,7 +21,7 @@ Live_graph Live_Graph(G_graph graph, Live_moveList moves);
 Live_graph Live_liveness(G_graph flow);
 Temp_temp Live_gtemp(G_node node);
 
-typedef struct TAB_table_ *T_table;
+typedef table_t T_table;
 T_table T_empty(void);
 void T_enter(T_table t, Temp_temp temp, G_node value);
 G_node T_look(T_table t, Temp_temp temp);

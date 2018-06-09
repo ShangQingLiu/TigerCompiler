@@ -25,59 +25,12 @@ extern bool anyErrors;
 /* print the assembly language instructions to filename.s */
 static void doProc(FILE *out, F_frame frame, T_stm body)
 {
-	AS_proc proc;
 	T_stmList stmList;
 	AS_instrList iList;
-	struct COL_result coloring;
 	
-	F_tempMap = Temp_empty();
-
 	stmList = C_linearize(body);
 	stmList = C_traceSchedule(C_basicBlocks(stmList));
-	printStmList(stdout, stmList);
-	/* printStmList(stdout, stmList);*/
-	iList  = F_codegen(frame, stmList); /* 9 */
-<<<<<<< HEAD
-	//printf("cg finish: %x\n", iList);
-	//G_graph fg = FG_AssemFlowGraph(iList);
-	//printf("count = %d", fg->nodecount);
-	//printf("flowgraph finish: %x\n", fg);
-	//Live_graph lg = Live_liveness(fg);
-	//printf("count = %d", lg->graph->nodecount);
-	//printf("livegraph finish: %x\n", lg);
-	
-	struct RA_result ra = RA_regAlloc(frame, iList);
-	fprintf(out, "#BEGIN function\n");
-	proc = F_procEntryExit3(frame, ra.il);
-	fprintf(out, "%s", proc->prolog);
-	AS_printInstrList(out, proc->body, Temp_layerMap(F_tempMap, ra.coloring)); // uncomment this to continue
-	fprintf(out, "%s", proc->epilog);
-	fprintf(out, "#END function\n\n");
-
-	//COL_color(lg, NULL, NULL);
-	
-	
-=======
-	printf("cg finish: %x\n", iList);
-
-	while (1) {
-		G_graph fg = FG_AssemFlowGraph(iList);
-		G_show(stdout, fg->mynodes, NULL);
-		printf("flowgraph finish: %x\n", fg);
-		Live_graph lg = Live_liveness(fg);
-		G_show(stdout, lg->graph->mynodes, NULL);
-		printf("livegraph finish: %x\n", lg);
-		coloring = COL_color(lg, NULL, NULL);
-		// if (coloring.spills == NULL) break;
-		// else iList = Rewrite(coloring, iList);
-		break;
-	}
-
->>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
-	//fprintf(out, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
-	//AS_printInstrList (out, iList,
-	//				   Temp_layerMap(F_tempMap,Temp_name()));
-	//fprintf(out, "END %s\n\n", Temp_labelstring(F_name(frame)));
+    printStmList(stdout, stmList);
 }
 
 int main(int argc, char *argv[])
@@ -112,7 +65,7 @@ int main(int argc, char *argv[])
 		if (anyErrors) return 1; /* don't continue */
 		
 		/* convert the filename */
-		sprintf(outfile, "%s.s", argv[1]);
+		sprintf(outfile, "./output/%s.s", argv[1]);
 		out = fopen(outfile, "w");
 		/* Chapter 8, 9, 10, 11 & 12 */
 		for (;frags;frags=frags->tail) {
@@ -137,3 +90,4 @@ int main(int argc, char *argv[])
 	EM_error(0,"usage: tiger file.tig");
 	return 1;
 }
+

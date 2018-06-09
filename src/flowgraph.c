@@ -46,9 +46,15 @@ G_graph FG_AssemFlowGraph(AS_instrList il)
 	AS_instrList cursor = il;
 	AS_instr instr = NULL;
 	G_node current = NULL, prev = NULL;
+
 	for (; cursor; cursor = cursor->tail) {
 		instr = cursor->head;
+<<<<<<< HEAD
 		//printf("cursor: %x\n", cursor);
+=======
+		current = G_Node(g, instr);
+		printf("cursor: %x\n", cursor);
+>>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
 		switch (instr->kind) {
 			case I_LABEL:
 				// Add label->node mapping so we can retrieve the node
@@ -64,7 +70,7 @@ G_graph FG_AssemFlowGraph(AS_instrList il)
 				break;
 			default: assert(0 && "Invalid instruction kind");
 		}
-		current = G_Node(g, instr);
+		
 		if (prev) G_addEdge(prev, current);
 		prev = current;
 	}
@@ -73,7 +79,10 @@ G_graph FG_AssemFlowGraph(AS_instrList il)
 		//printf("nodes: %x\n", nodes);
 		current = nodes->head;
 		FG_completeEdges(tl, current);
+<<<<<<< HEAD
 		//printf("nodes after: %x\n", nodes);
+=======
+>>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
 	}
 	return g;
 }

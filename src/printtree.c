@@ -3,7 +3,7 @@
  *
  */
 #include <stdio.h>
-#include "util.h"
+#include "utils.h"
 #include "symbol.h"
 #include "temp.h"
 #include "tree.h"
@@ -33,7 +33,7 @@ static void pr_stm(FILE *out, T_stm stm, int d)
     pr_stm(out, stm->u.SEQ.right,d+1); fprintf(out, ")");
     break;
   case T_LABEL:
-    indent(out,d); fprintf(out, "LABEL %s", S_name(stm->u.LABEL));
+    indent(out,d); fprintf(out, "LABEL %s", SymbolName(stm->u.LABEL));
     break;
   case T_JUMP:
     indent(out,d); fprintf(out, "JUMP(\n"); pr_tree_exp(out, stm->u.JUMP.exp,d+1); 
@@ -43,8 +43,8 @@ static void pr_stm(FILE *out, T_stm stm, int d)
     indent(out,d); fprintf(out, "CJUMP(%s,\n", rel_oper[stm->u.CJUMP.op]);
     pr_tree_exp(out, stm->u.CJUMP.left,d+1); fprintf(out, ",\n"); 
     pr_tree_exp(out, stm->u.CJUMP.right,d+1); fprintf(out, ",\n");
-    indent(out,d+1); fprintf(out, "%s,", S_name(stm->u.CJUMP.true));
-    fprintf(out, "%s", S_name(stm->u.CJUMP.false)); fprintf(out, ")");
+    indent(out,d+1); fprintf(out, "%s,", SymbolName(stm->u.CJUMP.true));
+    fprintf(out, "%s", SymbolName(stm->u.CJUMP.false)); fprintf(out, ")");
     break;
   case T_MOVE:
     indent(out,d); fprintf(out, "MOVE(\n"); pr_tree_exp(out, stm->u.MOVE.dst,d+1); 
@@ -80,7 +80,7 @@ static void pr_tree_exp(FILE *out, T_exp exp, int d)
     pr_tree_exp(out, exp->u.ESEQ.exp,d+1); fprintf(out, ")");
     break;
   case T_NAME:
-    indent(out,d); fprintf(out, "NAME %s", S_name(exp->u.NAME));
+    indent(out,d); fprintf(out, "NAME %s", SymbolName(exp->u.NAME));
     break;
   case T_CONST:
     indent(out,d); fprintf(out, "CONST %d", exp->u.CONST);

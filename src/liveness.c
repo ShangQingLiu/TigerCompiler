@@ -32,11 +32,12 @@ static Temp_tempList lookupLiveMap(G_table t, G_node flowNode) {
 
 //duplicate the temp list
 static Temp_tempList duplicateList(Temp_tempList l) {
+	Temp_tempList tl = NULL;
 	if(l == NULL)
 		return NULL;
 	if(l->tail)
-		duplicateList(l->tail);
-	return Temp_TempList(l->head, l->tail);
+		tl = duplicateList(l->tail);
+	return Temp_TempList(l->head, tl);
 }
 
 // small -> big, the key is cast Temp_temp to unsigned int
@@ -124,6 +125,17 @@ static bool tempList_Euqal(Temp_tempList l1, Temp_tempList l2) {
 	return TRUE;
 }
 
+// static void freeList(Temp_tempList l)
+// {
+// 	Temp_tempList p;
+//     while (l)
+//     {
+//         p = l;
+//         l = l->tail;
+//         free(p);
+//     }
+// }
+
 //liveness analyze 
 Live_graph Live_liveness(G_graph flow)
 {
@@ -132,8 +144,8 @@ Live_graph Live_liveness(G_graph flow)
 	Live_graph lg = Live_Graph(G_Graph(), NULL); //conflict graph
 
 	//iterative compute the live-in and live-out
-	Temp_tempList liveIn[flow->nodecount], liveInPrime[flow->nodecount];
-	Temp_tempList liveOut[flow->nodecount], liveOutPrime[flow->nodecount];
+	Temp_tempList *liveIn = checked_malloc(flow->nodecount*sizeof(*liveIn)), *liveInPrime = checked_malloc(flow->nodecount*sizeof(*liveIn));
+	Temp_tempList *liveOut = checked_malloc(flow->nodecount*sizeof(*liveIn)), *liveOutPrime = checked_malloc(flow->nodecount*sizeof(*liveIn));
 	//initialize
 	int i;
 	for(i=0; i<flow->nodecount; i++) {
@@ -147,10 +159,17 @@ Live_graph Live_liveness(G_graph flow)
 			liveInPrime[index] = duplicateList(liveIn[index]);
 			liveOutPrime[index] = duplicateList(liveOut[index]);
 			//calculate live-in and live-out
+			Temp_tempList tt = liveIn[index];
 			liveIn[index] = tempList_join(tempList_diff(liveOut[index], FG_def(p->head)),  
 								FG_use(p->head));
-			for(t=p->head->succs; t; t=t->tail)
+			freeList(tt);
+			for(t=p->head->succs; t; t=t->tail) {
+				tt = liveOut[index];
+				
 				liveOut[index] = tempList_join(liveOut[index], liveIn[t->head->mykey]);
+				freeList(tt);
+			}
+				
 		}
 
 		bool isEnd = TRUE;
@@ -202,7 +221,11 @@ Live_graph Live_liveness(G_graph flow)
 					T_enter(tempMap, p2->head, n2);
 				}
 				//bi-direction
+<<<<<<< HEAD
 				if(n1 != n2) {
+=======
+				if (n1 != n2) {
+>>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
 					G_addEdge(n1, n2);
 					G_addEdge(n2, n1);
 				}

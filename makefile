@@ -18,14 +18,23 @@ frame.o temp.o escape.o
 CG_OBJECTS = codegentest.o y.tab.o lex.yy.o errormsg.o ast.o past.o \
 symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o \
 frame.o temp.o assem.o flowgraph.o liveness.o color.o graph.o \
-escape.o canonical.o codegen.o
+escape.o canonical.o codegen.o printtree.o
+
+TREE_OBJECTS = treetest.o y.tab.o lex.yy.o errormsg.o ast.o past.o \
+symbol.o table.o utils.o types.o env.o semant.o translate.o tree.o \
+frame.o temp.o assem.o flowgraph.o liveness.o color.o graph.o \
+escape.o canonical.o codegen.o printtree.o
 
 # LEXER_OBJS = $(patsubst %,$(ODIR)/%,$(LEXER_OBJECTS))
 PARSER_OBJS = $(patsubst %,$(ODIR)/%,$(PARSER_OBJECTS))
 PARSE_OBJS = $(patsubst %,$(ODIR)/%,$(PARSE_OBJECTS))
 # SEM_OBJS = $(patsubst %,$(ODIR)/%,$(SEM_OBJECTS))
 # STR_OBJS  = $(patsubst %, $(ODIR)/%, $(STR_OBJECTS))
+<<<<<<< HEAD
 TREE_OBJS = $(patsubst %, $(ODIR)/%, $(CG_OBJECTS))
+=======
+TREE_OBJS = $(patsubst %, $(ODIR)/%, $(TREE_OBJECTS))
+>>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
 CG_OBJS = $(patsubst %, $(ODIR)/%, $(CG_OBJECTS))
 
 LEXER_PROG_NAME=$(BDIR)/lextest

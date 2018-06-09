@@ -1,0 +1,10 @@
+let
+    var N := 8
+     var a := 2
+    function main() = (        
+        N := a+N
+    )
+    
+in main()
+end
+	

@@ -76,6 +76,7 @@ F_fragList SEM_transProg(exp_t exp)
 // Translate expression 语义分析核心函数
 static struct expty transExp(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, exp_t a)
 {
+	printf("Exp: %d\n", a->kind);
 	switch (a->kind) {
 		case A_varExp:
 		{
@@ -437,6 +438,7 @@ static struct expty transVar(Tr_level level, table_t venv, table_t tenv, Tr_exp 
 // Translate declaration
 static Tr_exp transDec(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, dec_t d)
 {
+	printf("Dec: %d\n", d->kind);
 	switch (d->kind) {
 		case A_functionDec:
 		{

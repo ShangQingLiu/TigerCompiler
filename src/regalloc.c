@@ -1,4 +1,5 @@
 #include "regalloc.h"
+<<<<<<< HEAD
 #include "assem.h"
 #include "color.h"
 #include "frame.h"
@@ -173,4 +174,20 @@ RA_regAlloc(F_frame f, AS_instrList il)
   il = del_dup_move(il, ret.coloring);
   ret.il = il;
   return ret;
+=======
+#include "color.h"
+#include "graph.h"
+
+struct RA_result RA_regAlloc(F_frame f, AS_instrList il)
+{
+	struct COL_result coloring = COL_color(G_empty(),
+										F_tempMap, F_registers());
+	struct RA_result result = {coloring.coloring, il};
+	return result;
+}
+
+AS_instrList Rewrite(struct COL_result coloring, AS_instrList il)
+{
+	
+>>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
 }

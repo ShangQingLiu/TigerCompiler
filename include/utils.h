@@ -18,15 +18,12 @@ void* checked_malloc(int);
 typedef struct list_s *list_t;
 
 struct list_s {
-    union {
-        int i;
-        bool b;
-        void *data;
-    };
+    void *data;
     struct list_s *tail;
 };
 
 list_t list(void* data, list_t tail);
+void freeList(list_t);
 void addTo(void *data, list_t *head);
 void addToOrder(void *data, list_t *head);
 char deleteFrom(void *data, list_t *head);

@@ -14,7 +14,7 @@ G_node *Stack;     // Stack for coloring
 int sp;            // Stack pointer
 list_t simplifyList, freezeList, spillList, coaList, actualSpill;
 
-const int K = 16;
+const int K = 6;
 
 char isMoveRelated(G_node n)
 {
@@ -72,7 +72,7 @@ static void Simplify(Live_graph lg)
 static char Coalesce(Live_graph lg)
 {
     Live_moveList mList, last = NULL;
-    for (mList = lg->moves; mList;)
+    for (mList = lg->moves; mList; )
     {
         G_node src = mList->src, dst = mList->dst;
         src = Find(src);
@@ -102,7 +102,7 @@ static char Coalesce(Live_graph lg)
         for (np = src->succs; np; np = np->tail)
         {
             int nNum = np->head->mykey;
-            if (AdjMatrix[nNum][dstNum] || Degree[nNum] < K)
+            if (AdjMatrix[nNum][dstNum]==1 || Degree[nNum] < K)
                 continue;
             else
             {
@@ -121,7 +121,7 @@ static char Coalesce(Live_graph lg)
                 int nNum = np->head->mykey;
                 if (Degree[nNum] < 0 || Alias[nNum] != 0)
                     continue;
-                if (AdjMatrix[nNum][sNum]) // Adjacent to both nodes
+                if (AdjMatrix[nNum][rNum]==1) // Adjacent to both nodes
                 {
                     decDegree(np->head);
                 }
@@ -136,7 +136,27 @@ static char Coalesce(Live_graph lg)
             }
             if (!deleteFrom(s, &freezeList))
                 deleteFrom(s, &spillList);
+            #ifdef COL_DEBUG
+            list_t temp;
+            printf("list R %d:\n", r->mykey);
+            for (temp=NodeMoves[rNum]; temp; temp=temp->tail) {
+                printf("%d  ", ((G_node)(temp->data))->mykey);
+            }
+            printf("\nlist S %d:\n", s->mykey);
+            for (temp=NodeMoves[sNum]; temp; temp=temp->tail) {
+                printf("%d  ", ((G_node)(temp->data))->mykey);
+            }
+            #endif
+
             mergeList(&NodeMoves[rNum], &NodeMoves[sNum]);
+            
+            #ifdef COL_DEBUG
+            printf("\nMerged list R:\n");
+            for (temp=NodeMoves[rNum]; temp; temp=temp->tail) {
+                printf("%d  ", ((G_node)(temp->data))->mykey);
+            }
+            #endif
+
             if (Degree[rNum] >= K && deleteFrom(r, &freezeList))
             {
                 addTo(r, &spillList);
@@ -155,17 +175,20 @@ static void FreezeAdj(G_node n)
     {
         G_node m = moveAdj->data;
         int mNum = m->mykey;
+        printf("Fadj %d\n", mNum);
         list_t iter = NodeMoves[mNum];
         last = NULL;
         while (iter)
         {
             G_node t = iter->data;
-            int tNum = m->mykey;
+            int tNum = t->mykey;
+            printf("\tMove to %d\n", tNum);
             if (t==n || Degree[tNum]<0 || Alias[tNum])
             {
                 // Remove this node from move list
                 p = iter;
                 iter = iter->tail;
+                printf("delete node move:%d %p %p\n", tNum, p, iter);
                 free(p);
                 if (last == NULL)
                     NodeMoves[mNum] = iter;
@@ -190,11 +213,12 @@ static void FreezeAdj(G_node n)
 static void Freeze()
 {
     G_node n = freezeList->data;
-    deleteFrom(n, &freezeList);
-    addTo(n, &simplifyList);
     #ifdef COL_DEBUG
-    printf("Freeze node: %x\n", n);
+    printf("Freeze node: %x  %d\n", n, n->mykey);
     #endif
+    deleteFrom(n, &freezeList);    
+    addTo(n, &simplifyList);
+    
     FreezeAdj(n);
     #ifdef COL_DEBUG
     printf("Freeze adj\n");
@@ -206,8 +230,9 @@ static void SelectSpill()
     list_t p;
     G_node candid;
     int maxD = 0, pNum;
+    
     for (p=spillList; p; p=p->tail)
-    {
+    {     
         pNum = ((G_node)(p->data))->mykey;
         if (Degree[pNum] > maxD)
         {
@@ -218,9 +243,13 @@ static void SelectSpill()
     pNum = candid->mykey;
     // Mark as potential spill
     Degree[pNum] = -2;
+    printf("Selected Spill%d\n", pNum);
+    
     Stack[sp++] = candid;
+    deleteFrom(candid, &spillList);
 
     G_nodeList l;
+    
     for (l=candid->succs; l; l=l->tail)
     {
         decDegree(l->head);
@@ -272,6 +301,7 @@ static void preProc(Live_graph lg)
         {
             dCount++;
             AdjMatrix[curNum][np->head->mykey] = 1;
+            AdjMatrix[np->head->mykey][curNum] = 1;
         }
         Degree[curNum] = dCount;
     }
@@ -282,8 +312,13 @@ static void preProc(Live_graph lg)
     {
         G_node src = mList->src, dst = mList->dst;
         if (AdjMatrix[src->mykey][dst->mykey]) continue;
+        if (src == dst) {
+            assert(0);
+        }
         addToOrder(src, &(NodeMoves[dst->mykey]));
         addToOrder(dst, &(NodeMoves[src->mykey]));
+        AdjMatrix[src->mykey][dst->mykey] = 2;
+        AdjMatrix[dst->mykey][src->mykey] = 2;
     }
 
     // Build freeze, simplify, spill list
@@ -305,42 +340,66 @@ static void preProc(Live_graph lg)
     #endif
 }
 
+static void endProc(Live_graph lg)
+{
+    int i, n = lg->graph->nodecount;
+    AdjMatrix = (char **)checked_malloc(n * sizeof(*AdjMatrix));
+    for (i = 0; i < n; i++)
+    {
+        free(AdjMatrix[i]);
+    }
+    free(AdjMatrix);
+    free(Alias);
+    free(Degree);
+    free(NodeMoves);
+    free(Stack);
+}
+
 static Temp_map AssignColor()
 {
     char colorPad[K+1];
-    int i;
+    int i, count = 0;
     Temp_map mmap = Temp_empty();
     while (sp)
     {
         G_node n = Stack[--sp];
-        memset(colorPad, 0, K*sizeof(char));
+        memset(colorPad, 0, (K+1)*sizeof(char));
         G_nodeList l;
         for (l=n->succs; l; l=l->tail)
         {
             G_node nei = l->head;
-            if (Degree[nei->mykey] > 0)
+            if (Degree[nei->mykey] > 0 && Alias[nei->mykey] == 0)
             {
+                int neiCol = (int)Temp_look(mmap, nei->info);
+                printf("Nei %d\n", neiCol);
                 colorPad[(int)Temp_look(mmap, nei->info)] = 1;
             }
         }
         for (i=1; i<=K; i++)
         {
             if (colorPad[i]) continue;
+            else break;
         }
 
         if (i > K)
         {
             //Temp_enter(mmap, n->info, (string_t)0);
             addTo(n->info, &actualSpill);
+            count ++;
         }
         else
         {
             Degree[n->mykey] = 1;
             Temp_enter(mmap, n->info, (string_t)i);
+<<<<<<< HEAD
 			printf("%d ", i);
 			printf("%d\n", (int)Temp_look(mmap, n->info));
+=======
+            printf("Enter %d\n", i);
+>>>>>>> 8f88db788dff51a3fe06273ec249d88f8d1c967f
         }
     }
+    printf("%d Actual spills\n", count);
     return mmap;
 }
 
@@ -384,7 +443,12 @@ struct COL_result COL_color(Live_graph lg, Temp_map initial, Temp_tempList regs)
             }
         }
     }
+printf("sp: %d\n", sp);
+    struct COL_result rst;
+    rst.coloring = AssignColor(lg);
+    rst.spills = actualSpill;
 
-    AssignColor(lg);
+    endProc(lg);
     printf("colend\n");
+    return rst;
 }

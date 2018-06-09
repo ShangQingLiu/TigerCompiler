@@ -611,5 +611,6 @@ F_fragList Tr_getResult(void)
 	for (cursor = stringList; cursor; cursor = cursor->tail)
 		prev = cursor;
 	if (prev) prev->tail = fragList;
+	printf("translate: %x\n%x\n", stringList, fragList);
 	return stringList ? stringList : fragList;
 }

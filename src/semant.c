@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#define E_DEBUG
+// #define E_DEBUG
 
 /* prototypes for functions local to this module */
 static struct expty transExp(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, exp_t a);

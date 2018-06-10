@@ -93,16 +93,14 @@
 																	expList(
 																		callExp(print,
 																			expList(
-																				stringExp(
-),
+																				stringExp(\n),
 																				expList())),
 																		expList()))),
 															FALSE),
 														expList(
 															callExp(print,
 																expList(
-																	stringExp(
-),
+																	stringExp(\n),
 																	expList())),
 															expList())))),
 											fundecList(

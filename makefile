@@ -78,8 +78,8 @@ $(ODIR)/codegen.o: $(SDIR)/x86codegen.c
 $(ODIR)/lex.yy.o: $(SDIR)/lex.yy.c
 	$(COMPILER) $(CFLAGS) $@ $<
 
-#$(SDIR)/lex.yy.c: $(SDIR)/tiger.l
-	# flex -o $(SDIR)/lex.yy.c $<
+$(SDIR)/lex.yy.c: $(SDIR)/tiger.l
+	flex -o $(SDIR)/lex.yy.c $<
 
 $(ODIR)/y.tab.o: $(SDIR)/y.tab.c
 	$(COMPILER) $(CFLAGS) $@ $<
@@ -88,5 +88,4 @@ $(ODIR)/y.tab.o: $(SDIR)/y.tab.c
 	# bison -ydvo $@ $<
 
 clean: 
-	rm -f $(ODIR)/*.o $(LEXER_PROG_NAME) $(PARSER_PROG_NAME) $(PARSE_PROG_NAME) \
-		$(SEM_PROG_NAME) $(STR_PROG_NAME) $(TREE_PROG_NAME) $(PROG_NAME)
+	rm -f $(ODIR)/*.o $(BDIR)/*.exe

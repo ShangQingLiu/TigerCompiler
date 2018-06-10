@@ -50,7 +50,6 @@ rewrite_inst(Temp_tempList tl, Temp_temp oldt, Temp_temp newt)
 }
 
 
-Temp_temp observe;
 
 enum { AS_USE, AS_DEF };
 static void
@@ -65,7 +64,7 @@ rewrite(Temp_temp spill, AS_instrList il, F_frame f)
 
   F_access inmem = F_allocLocal(f, TRUE); // ESCAPE=TRUE. it's on stack
   Temp_temp t0 = Temp_newtemp();
-  observe = t0;
+
   //printf("rewrite\n");
   bool D_use_before_def = TRUE;
   for (; il; last = il, il = il->tail) {
@@ -200,12 +199,12 @@ RA_regAlloc(F_frame f, AS_instrList il)
     G_show(fout, flowgraph->mynodes, NULL);
     Live_graph livegraph = Live_liveness(flowgraph);    
 	  G_show(fout, livegraph->graph->mynodes, NULL);
-    list_t tlist;
-    for (tlist = livegraph->graph->mynodes; tlist; tlist=tlist->tail) {
-      if (G_nodeInfo(tlist->data) == observe) {
-        printf("Found key: %d\n", ((G_node)(tlist->data))->mykey);
-      }
-    }
+    // list_t tlist;
+    // for (tlist = livegraph->graph->mynodes; tlist; tlist=tlist->tail) {
+    //   if (G_nodeInfo(tlist->data) == observe) {
+    //     printf("Found key: %d\n", ((G_node)(tlist->data))->mykey);
+    //   }
+    // }
     fclose(fout);
 
     Temp_tempList regs = F_registers();
@@ -223,7 +222,7 @@ RA_regAlloc(F_frame f, AS_instrList il)
   }
   assert(debug != upper && "spill error");
   il = del_dup_move(il, ret.coloring);
-  printf("Del dup done\n");
+  // printf("Del dup done\n");
   ret.il = il;
   return ret;
 }

@@ -446,7 +446,7 @@ static Temp_map AssignColor()
         }
     }
     // #ifdef COL_DEBUG
-    printf("%d Actual spills   %p\n", count, actualSpill);
+    printf("%d Actual spills\n", count);
     // #endif
     list_t p;
     for (p=coaList; p; p=p->tail)

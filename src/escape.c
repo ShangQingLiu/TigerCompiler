@@ -160,7 +160,7 @@ static void traverse_var(var_t var)
         case A_simpleVar: {
             escape_entry_t entry = SymbolLookup(_env, var->u.simple);
             if (entry && entry->depth < _depth) {
-                printf("escape: %s %d %d\n", var->u.simple->name, entry->depth, _depth);
+                // printf("escape: %s %d %d\n", var->u.simple->name, entry->depth, _depth);
                 *(entry->escape) = TRUE;
             }
             break;

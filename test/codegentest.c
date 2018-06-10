@@ -49,10 +49,10 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	
 	struct RA_result ra = RA_regAlloc(frame, iList);
 	fprintf(out, "#BEGIN function\n");
-	proc = F_procEntryExit3(frame, ra.il);
-	fprintf(out, "%s", proc->prolog);
-	AS_printInstrList(out, proc->body, Temp_layerMap(F_tempMap, ra.coloring)); // uncomment this to continue
-	fprintf(out, "%s", proc->epilog);
+	//proc = F_procEntryExit3(frame, ra.il);
+	//fprintf(out, "%s", proc->prolog);
+	AS_printInstrList(out, iList, Temp_layerMap(F_tempMap, ra.coloring)); // uncomment this to continue
+	//fprintf(out, "%s", proc->epilog);
 	fprintf(out, "#END function\n\n");
 
 	//COL_color(lg, NULL, NULL);

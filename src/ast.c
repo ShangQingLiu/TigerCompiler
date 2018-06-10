@@ -143,7 +143,7 @@ exp_t ForExp(pos_t pos, symbol_t var, exp_t lo, exp_t hi, exp_t body) {
     p->u.forr.lo = lo;
     p->u.forr.hi = hi;
     p->u.forr.body = body;
-    p->u.forr.escape = TRUE;
+    p->u.forr.escape = FALSE;
     
     return p;    
 }
@@ -193,7 +193,7 @@ dec_t VarDec(pos_t pos, symbol_t var, symbol_t typ, exp_t init) {
     p->u.var.var = var;
     p->u.var.typ = typ;
     p->u.var.init = init;
-    p->u.var.escape = TRUE;
+    p->u.var.escape = FALSE;
 
     return p;
 }
@@ -236,7 +236,7 @@ field_t Field(pos_t pos, symbol_t name, symbol_t typ) {
     p->pos = pos;
     p->name = name;
     p->typ = typ;
-    p->escape = TRUE;
+    p->escape = FALSE;
     return p;
 }
 

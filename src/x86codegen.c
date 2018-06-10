@@ -243,9 +243,9 @@ static Temp_temp munchExp(T_exp expr)
 		{
 			/* NAME(n) */
 			Temp_temp r = Temp_newtemp();
-			emit(AS_Oper(String_format("movl %s,`d0\n", Temp_labelstring(expr->u.NAME)),
-							TL(r, NULL), NULL, NULL));
-			//Temp_enter(F_tempMap, r, Temp_labelstring(expr->u.NAME));
+			// emit(AS_Oper(String_format("movl `d0, %s\n", Temp_labelstring(expr->u.NAME)),
+			// 				TL(r, NULL), NULL, NULL));
+			Temp_enter(F_tempMap, r, Temp_labelstring(expr->u.NAME));
 			return r;
 		}
 		case T_CONST:

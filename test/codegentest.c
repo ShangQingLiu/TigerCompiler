@@ -31,7 +31,7 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	AS_instrList iList;
 	struct COL_result coloring;
 	
-	F_tempMap = Temp_empty();
+	F_tempMap = Temp_name();
 
 	stmList = C_linearize(body);
 	stmList = C_traceSchedule(C_basicBlocks(stmList));
@@ -48,17 +48,19 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	//printf("livegraph finish: %x\n", lg);
 	
 	struct RA_result ra = RA_regAlloc(frame, iList);
-	fprintf(out, "#BEGIN function\n");
-	proc = F_procEntryExit3(frame, ra.il);
-	fprintf(out, "%s", proc->prolog);
-	AS_printInstrList(out, proc->body, Temp_layerMap(F_tempMap, ra.coloring)); // uncomment this to continue
-	fprintf(out, "%s", proc->epilog);
-	fprintf(out, "#END function\n\n");
+	// printf("%p\n", ra.coloring);
+	AS_printInstrList(out, ra.il,Temp_layerMap(F_tempMap, ra.coloring)); // uncomment this to continue
+	
+	// fprintf(out, "#BEGIN function\n");
+	// proc = F_procEntryExit3(frame, ra.il);
+	// fprintf(out, "%s", proc->prolog);
+	// fprintf(out, "%s", proc->epilog);
+	// fprintf(out, "#END function\n\n");
 
 	//COL_color(lg, NULL, NULL);
 	//fprintf(out, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
-	//AS_printInstrList (out, iList,
-	//				   Temp_layerMap(F_tempMap,Temp_name()));
+	// AS_printInstrList (stdout, iList,
+	// 				   Temp_layerMap(F_tempMap,Temp_name()));
 	//fprintf(out, "END %s\n\n", Temp_labelstring(F_name(frame)));
 }
 

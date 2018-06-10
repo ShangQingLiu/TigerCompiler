@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "liveness.h"
 #include "stdlib.h"
-#define COL_DEBUG
+// #define COL_DEBUG
 
 char **AdjMatrix;  // Adjacent matrix
 G_node *Alias;     // Coalesced nodes, a disjoint set
@@ -13,6 +13,8 @@ list_t *NodeMoves; // Move related node list
 G_node *Stack;     // Stack for coloring
 int sp;            // Stack pointer
 list_t simplifyList, freezeList, spillList, coaList, actualSpill;
+
+char rNames[6][5] = {"eax", "ebx", "ecx", "edx", "esi", "edi"};
 
 const int K = 6;
 
@@ -54,6 +56,13 @@ static void Simplify(Live_graph lg)
     G_node n;
     G_nodeList l;
 
+    #ifdef COL_DEBUG
+    for (p=simplifyList; p; p=p->tail) {
+        printf("%d ", ((G_node)(p->data))->mykey);
+    }
+    printf("\n");
+    #endif
+
     while (simplifyList)
     {        
         p = simplifyList;
@@ -62,11 +71,29 @@ static void Simplify(Live_graph lg)
         free(p);
         Degree[n->mykey] = -1; // Marked as simplified
         Stack[sp++] = n;
+        #ifdef COL_DEBUG
+        printf("sim %d  sp %d\nBefore Sim:\n", n->mykey, sp);
+        int i;        
+        for (i=0; i<7; i++) {
+            printf("D[%d]: %d\n", i, Degree[i]);
+        }
+        #endif
         
         for (l = n->succs; l; l = l->tail)
         {
             decDegree(l->head);
         }
+        #ifdef COL_DEBUG
+        printf("After dec:\n");
+        for (i=0; i<7; i++) {
+            printf("D[%d]: %d\n", i, Degree[i]);
+        }
+        printf("\n");
+        for (p=simplifyList; p; p=p->tail) {
+            printf("%d ", ((G_node)(p->data))->mykey);
+        }
+        printf("\n");
+        #endif
     }
 }
 
@@ -78,7 +105,7 @@ static char Coalesce(Live_graph lg)
         G_node src = mList->src, dst = mList->dst;
         src = Find(src);
         dst = Find(dst);
-        if (src == dst)
+        if (src == dst || Degree[src->mykey]<0 || Degree[dst->mykey]<0 || AdjMatrix[src->mykey][dst->mykey])
         {
             // Delete from move list
             if (last == NULL)
@@ -115,6 +142,7 @@ static char Coalesce(Live_graph lg)
         { // Valid to combine
             G_node r = Combine(src, dst);
             G_node s = (r == src) ? dst : src;
+            addTo(s, &coaList);
             int rNum = r->mykey;
             int sNum = s->mykey;
             for (np = s->succs; np; np = np->tail)
@@ -293,7 +321,7 @@ static void preProc(Live_graph lg)
     memset(NodeMoves, 0, n * sizeof(*NodeMoves));
     Stack = (G_node *)checked_malloc(n * sizeof(*Stack));
     sp = 0;
-    simplifyList = freezeList = spillList = coaList = NULL;
+    simplifyList = freezeList = spillList = coaList = actualSpill = NULL;
 
     #ifdef COL_DEBUG
     //printf("Init finish\n");
@@ -363,6 +391,16 @@ static void endProc(Live_graph lg)
     free(Stack);
 }
 
+static int regToInt(string_t name)
+{
+    int i;
+    if (!name) return 0;
+    for (i=0; i<K; i++) {
+        if (name == rNames[i]) return i+1;
+    }
+    return 0;
+}
+
 static Temp_map AssignColor()
 {
     char colorPad[K+1];
@@ -378,7 +416,7 @@ static Temp_map AssignColor()
             G_node nei = l->head;
             if (Degree[nei->mykey] > 0 && Alias[nei->mykey] == 0)
             {
-                int neiCol = (int)Temp_look(mmap, nei->info);
+                int neiCol = regToInt(Temp_look(mmap, nei->info));
                 #ifdef COL_DEBUG
                 printf("\tNei %d\n", neiCol);
                 #endif
@@ -400,16 +438,23 @@ static Temp_map AssignColor()
         else
         {
             Degree[n->mykey] = 1;
-            Temp_enter(mmap, n->info, (string_t)i);
+            Temp_enter(mmap, n->info, rNames[i-1]);
             #ifdef COL_DEBUG
 			printf("Node%d  Color%d sp%d\n", n->mykey, i, sp);
 			// printf("%d\n", (int)Temp_look(mmap, n->info));
             #endif
         }
     }
-    #ifdef COL_DEBUG
-    printf("%d Actual spills\n", count);
-    #endif
+    // #ifdef COL_DEBUG
+    printf("%d Actual spills   %p\n", count, actualSpill);
+    // #endif
+    list_t p;
+    for (p=coaList; p; p=p->tail)
+    {        
+        Temp_enter(mmap, ((G_node)(p->data))->info, Temp_look(mmap, ((G_node)Find(p->data))->info));
+        // printf("Coa %s\n", Temp_look(mmap, ((G_node)(p->data))->info));
+    }
+
     return mmap;
 }
 

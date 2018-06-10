@@ -1,8 +1,12 @@
 let
-    var N := 8
-     var a := 2
-    function main() = (        
-        N := a+N
+    
+    function main() = (    
+        let
+            var N := 8
+            var a := 2
+        in
+            N := a+N
+        end
     )
     
 in main()

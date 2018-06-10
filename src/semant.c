@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#define E_DEBUG
+
 /* prototypes for functions local to this module */
 static struct expty transExp(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, exp_t a);
 static struct expty transVar(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk, var_t v);
@@ -487,8 +489,7 @@ static Tr_exp transDec(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk
 				if (!is_equal_ty(funEntry->u.fun.result, e.ty))
 					EM_error(funList->head->body->pos, "incorrect return type %s; expected %s",
 						Ty_ToString(e.ty), Ty_ToString(funEntry->u.fun.result));
-						
-				// ????
+					
 				Tr_procEntryExit(funEntry->u.fun.level, e.exp, accessList);
 				SymbolEndScope(venv);
 			}
@@ -497,7 +498,12 @@ static Tr_exp transDec(Tr_level level, table_t venv, table_t tenv, Tr_exp breakk
 		case A_varDec:
 		{
 			struct expty e = transExp(level, venv, tenv, breakk, d->u.var.init);
-			Tr_access access = Tr_allocLocal(level, TRUE);
+			Tr_access access = Tr_allocLocal(level, d->u.var.escape);
+			#ifdef E_DEBUG
+			if (d->u.var.escape == 0) {
+				printf("Find not escape %s\n", d->u.var.var);
+			}
+			#endif
 			if (d->u.var.typ) {
 				Type_t type = S_look_ty(tenv, d->u.var.typ);
 				if (!type) {

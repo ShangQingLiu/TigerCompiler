@@ -230,7 +230,6 @@ F_fragList F_FragList(F_frag head, F_fragList tail)
 Temp_tempList F_registers(void)
 {
 	return F_make_arg_regs();
-	//return Temp_TempList_join(F_caller_saves(), F_callee_saves());
 }
 
 static Temp_temp fp = NULL;

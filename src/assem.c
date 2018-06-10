@@ -44,8 +44,8 @@ AS_instr AS_Move(string_t a, Temp_tempList d, Temp_tempList s)
 	AS_instr p = checked_malloc(sizeof *p);
 	p->kind = I_MOVE;
 	p->u.MOVE.assem=a; 
-	p->u.MOVE.dst=d; 
-	p->u.MOVE.src=s; 
+	p->u.MOVE.dst=d;
+	p->u.MOVE.src=s;
 	return p;
 }
 
@@ -93,14 +93,18 @@ static void format(char *result, string_t assem, Temp_tempList dst,
 	for(p = assem; p && *p != '\0'; p++)
 		if (*p == '`')
 			switch(*(++p)) {
-			case 's': {int n = atoi(++p);
+			case 's': {
+				int n = atoi(++p);
+				
 				string_t s = Temp_look(m, nthTemp(src,n));
+				
 				strcpy(result+i, s);
 				i += strlen(s);
 					  }
 					  break;
 			case 'd': {int n = atoi(++p);
 				string_t s = Temp_look(m, nthTemp(dst,n));
+				assert(s);
 				strcpy(result+i, s);
 				i += strlen(s);
 					  }
@@ -116,7 +120,7 @@ static void format(char *result, string_t assem, Temp_tempList dst,
 				break;
 			default: assert(0);
 		}
-		else {result[i] = *p; i++; }
+		else {result[i] = *p; i++;}
 		result[i] = '\0';
 }
 

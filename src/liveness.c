@@ -46,27 +46,32 @@ static Temp_tempList sortedInsert(Temp_tempList l, Temp_temp t){
 		l = Temp_TempList(t, NULL);
 	}
 	else {
-		Temp_tempList p = l;
-		while(p->tail) {
-			if(p == l) {
-				if(p->head == t) 
-					return l;
-				if((unsigned int)(p->head) > (unsigned int)(t))
-					break;
-			}
-			else {
-				if(p->tail->head == t)
-					return l;
-				if((unsigned int)(p->tail->head) > (unsigned int)(t))
-					break;
-			}
+		Temp_tempList p = l, prev=NULL;
+		while(p) {
+			// if(p == l) {
+			// 	if(p->head == t) 
+			// 		return l;
+			// 	if((unsigned int)(p->head) > (unsigned int)(t))
+			// 		break;
+			// }
+			// else {
+			// 	if(p->tail->head == t)
+			// 		return l;
+			// 	if((unsigned int)(p->tail->head) > (unsigned int)(t))
+			// 		break;
+			// }
+			if(p->head == t)
+				return l;
+			if((unsigned int)(p->head) > (unsigned int)(t))
+				break;
+			prev = p;
 			p = p->tail;
 		}
 		if(p == l){
 			l = Temp_TempList(t, p);
 		}
 		else {
-			p->tail = Temp_TempList(t, p->tail);
+			prev->tail = Temp_TempList(t, p);
 		}
 	}
 	return l;
@@ -97,6 +102,7 @@ static Temp_tempList tempList_join(Temp_tempList l1, Temp_tempList l2) {
 	Temp_tempList p = l2;
 	for( ; p; p=p->tail) {
 		list = sortedInsert(list, p->head);
+		// addToOrder(p->head, &list);
 	}
 	return list;
 }
@@ -124,17 +130,6 @@ static bool tempList_Euqal(Temp_tempList l1, Temp_tempList l2) {
 		return FALSE;
 	return TRUE;
 }
-
-// static void freeList(Temp_tempList l)
-// {
-// 	Temp_tempList p;
-//     while (l)
-//     {
-//         p = l;
-//         l = l->tail;
-//         free(p);
-//     }
-// }
 
 //liveness analyze 
 Live_graph Live_liveness(G_graph flow)
@@ -184,17 +179,25 @@ Live_graph Live_liveness(G_graph flow)
 	}
 
 	//store the live-out of each node
+	extern Temp_map F_tempMap;
 	for(p=flow->mynodes; p; p=p->tail) {
+		// printf("liveout[%d]: ", p->head->mykey);
+		// Temp_tempList q;
+		// for(q=liveOut[p->head->mykey]; q; q=q->tail) {
+		// 	printf("%s-%p ", Temp_look(F_tempMap, q->head),q->head);
+		// }
+		// printf("\n");
 		enterLiveMap(liveMap, p->head, liveOut[p->head->mykey]);
 	}
 
 	//establish the conflict graph
 	for(p=flow->mynodes; p; p=p->tail) {
-		G_node n1, n2;
+		G_node n1, n2, c=NULL;
 		Temp_tempList p1, p2;
 		if(FG_isMove(p->head)) {
 			p1 = FG_use(p->head);
 			p2 = FG_def(p->head);
+			
 			if(p1 && (n1 = T_look(tempMap, p1->head)) == NULL) {
 				n1 = G_Node(lg->graph, p1->head);
 				T_enter(tempMap, p1->head, n1);
@@ -203,15 +206,18 @@ Live_graph Live_liveness(G_graph flow)
 				n2 = G_Node(lg->graph, p2->head);
 				T_enter(tempMap, p2->head, n2);
 			}
-			if(n1 && n2 && n1!=n2)
+			if(n1 && n2 && n1!=n2) {
+				c = p1;
 				lg->moves = Live_MoveList(n1, n2, lg->moves);
-			continue;
+				// printf("Move %d-%d\n", n1->mykey, n2->mykey);
+			}
 		}
 		Temp_tempList outList = lookupLiveMap(liveMap, p->head);
 		Temp_tempList defList = FG_def(p->head);
-		
+		// printf("def[%d]:%p\n",p->head->mykey, defList);
 		for(p1=defList; p1; p1=p1->tail) {	
 			for(p2=outList; p2; p2=p2->tail) {
+				p2->head->num = -1;
 				if((n1 = T_look(tempMap, p1->head)) == NULL) {
 					n1 = G_Node(lg->graph, p1->head);
 					T_enter(tempMap, p1->head, n1);
@@ -221,13 +227,14 @@ Live_graph Live_liveness(G_graph flow)
 					T_enter(tempMap, p2->head, n2);
 				}
 				//bi-direction
-				if(n1 != n2) {
+				if(n1 != n2 && p2->head!=c) {
 					G_addEdge(n1, n2);
 					G_addEdge(n2, n1);
 				}
 			}
 		}
 	}
+	// printf("end!\n");
 
 	return lg;
 }

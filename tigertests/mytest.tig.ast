@@ -1,30 +1,35 @@
 	letExp(
 		decList(
-			varDec(N,
-				intExp(8),
-				TRUE),
-			decList(
-				varDec(a,
-					intExp(2),
-					TRUE),
-				decList(
-					functionDec(
-						fundecList(
-							fundec(main,
-								fieldList(),
-								seqExp(
-									expList(
-										assignExp(
-											simpleVar(N),
-											opExp(
-												PLUS,
-												varExp(
-													simpleVar(a)),
-												varExp(
-													simpleVar(N)))),
-										expList()))),
-							fundecList())),
-					decList()))),
+			functionDec(
+				fundecList(
+					fundec(main,
+						fieldList(),
+						seqExp(
+							expList(
+								letExp(
+									decList(
+										varDec(N,
+											intExp(8),
+											FALSE),
+										decList(
+											varDec(a,
+												intExp(2),
+												FALSE),
+											decList())),
+									seqExp(
+										expList(
+											assignExp(
+												simpleVar(N),
+												opExp(
+													PLUS,
+													varExp(
+														simpleVar(a)),
+													varExp(
+														simpleVar(N)))),
+											expList()))),
+								expList()))),
+					fundecList())),
+			decList()),
 		seqExp(
 			expList(
 				callExp(main,

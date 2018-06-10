@@ -8,6 +8,7 @@
 #include "symbol.h"
 #include "table.h"
 
+struct Temp_temp_ {int num;};
 // Table type mapping labels to information
 typedef table_t TL_table;
 

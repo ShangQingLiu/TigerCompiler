@@ -2,7 +2,7 @@
 		decList(
 			varDec(N,
 				intExp(8),
-				TRUE),
+				FALSE),
 			decList(
 				typeDec(
 					nametyList(
@@ -15,14 +15,14 @@
 							varExp(
 								simpleVar(N)),
 							intExp(0)),
-						TRUE),
+						FALSE),
 					decList(
 						varDec(col,
 							arrayExp(intArray,
 								varExp(
 									simpleVar(N)),
 								intExp(0)),
-							TRUE),
+							FALSE),
 						decList(
 							varDec(diag1,
 								arrayExp(intArray,
@@ -36,7 +36,7 @@
 												simpleVar(N))),
 										intExp(1)),
 									intExp(0)),
-								TRUE),
+								FALSE),
 							decList(
 								varDec(diag2,
 									arrayExp(intArray,
@@ -50,7 +50,7 @@
 													simpleVar(N))),
 											intExp(1)),
 										intExp(0)),
-									TRUE),
+									FALSE),
 								decList(
 									functionDec(
 										fundecList(
@@ -89,7 +89,7 @@
 																					stringExp( O),
 																					stringExp( .)),
 																				expList())),
-																		TRUE),
+																		FALSE),
 																	expList(
 																		callExp(print,
 																			expList(
@@ -97,7 +97,7 @@
 ),
 																				expList())),
 																		expList()))),
-															TRUE),
+															FALSE),
 														expList(
 															callExp(print,
 																expList(
@@ -110,7 +110,7 @@
 													fieldList(
 														field(c,
 															int,
-															TRUE),
+															FALSE),
 														fieldList()),
 													seqExp(
 														expList(
@@ -159,4 +159,27 @@
 																				varExp(
 																					subscriptVar(
 																						simpleVar(diag2),
-																						
+																						opExp(
+																							MINUS,
+																							opExp(
+																								PLUS,
+																								varExp(
+																									simpleVar(r)),
+																								intExp(7)),
+																							varExp(
+																								simpleVar(c))))),
+																				intExp(0)),
+																			intExp(0)),
+																		seqExp(
+																			expList())),
+																	FALSE)),
+															expList()))),
+												fundecList()))),
+									decList()))))))),
+		seqExp(
+			expList(
+				callExp(try,
+					expList(
+						intExp(0),
+						expList())),
+				expList())))

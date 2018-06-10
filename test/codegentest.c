@@ -31,7 +31,7 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	AS_instrList iList;
 	struct COL_result coloring;
 	
-	F_tempMap = Temp_empty();
+	F_tempMap = Temp_name();
 
 	stmList = C_linearize(body);
 	stmList = C_traceSchedule(C_basicBlocks(stmList));
@@ -48,6 +48,7 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	//printf("livegraph finish: %x\n", lg);
 	
 	struct RA_result ra = RA_regAlloc(frame, iList);
+
 	fprintf(out, "#BEGIN function\n");
 	//proc = F_procEntryExit3(frame, ra.il);
 	//fprintf(out, "%s", proc->prolog);
@@ -57,8 +58,8 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 
 	//COL_color(lg, NULL, NULL);
 	//fprintf(out, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
-	//AS_printInstrList (out, iList,
-	//				   Temp_layerMap(F_tempMap,Temp_name()));
+	// AS_printInstrList (stdout, iList,
+	// 				   Temp_layerMap(F_tempMap,Temp_name()));
 	//fprintf(out, "END %s\n\n", Temp_labelstring(F_name(frame)));
 }
 
@@ -102,14 +103,14 @@ int main(int argc, char *argv[])
 				doProc(out, frags->head->u.proc.frame, frags->head->u.proc.body);
 			} else if (frags->head->kind == F_stringFrag) {
 				if (isFirstString) {
-					fprintf(out, "section .text\n\"\t%s\t.db\t\"%s\"\n", 
-							frags->head->u.stringg.str,
-							frags->head->u.stringg.label);
+					fprintf(out, "section .text\n\t%s:\tdb\t\"%s\"\n", 
+							frags->head->u.stringg.label->name,
+							frags->head->u.stringg.str);
 					isFirstString = 0;
 				} else {
-					fprintf(out, "\t%s\t.db\t\"%s\"\n", 
-							frags->head->u.stringg.str,
-							frags->head->u.stringg.label);
+					fprintf(out, "\t%s:\tdb\t\"%s\"\n",
+							frags->head->u.stringg.label->name,
+							frags->head->u.stringg.str);
 				}
 			}
 		}

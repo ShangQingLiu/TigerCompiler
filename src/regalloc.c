@@ -170,7 +170,7 @@ del_dup_move(AS_instrList il, Temp_map coloring)
       //      il->head->u.MOVE.assem, d, s);
   }
   else if (il->head->kind == I_OPER) {
-    if (il->head->u.OPER.dst && isAllDummy(il->head->u.OPER.dst)) {
+    if (!il->head->u.OPER.jumps && il->head->u.OPER.dst && isAllDummy(il->head->u.OPER.dst)) {
       // Delete
       il = il->tail;
       free(tp);
@@ -193,19 +193,17 @@ RA_regAlloc(F_frame f, AS_instrList il)
   //newly_created = NULL;
 
   for (; debug < upper; debug++) {
-	  printf("debug = %d\n", debug);
+	  // printf("debug = %d\n", debug);
     G_graph flowgraph = FG_AssemFlowGraph(il);
     FILE* fout = fopen("./output/graph.txt", "w");
     G_show(fout, flowgraph->mynodes, NULL);
+    printf("flow done\n");
+    fclose(fout);
     Live_graph livegraph = Live_liveness(flowgraph);    
 	  G_show(fout, livegraph->graph->mynodes, NULL);
-    // list_t tlist;
-    // for (tlist = livegraph->graph->mynodes; tlist; tlist=tlist->tail) {
-    //   if (G_nodeInfo(tlist->data) == observe) {
-    //     printf("Found key: %d\n", ((G_node)(tlist->data))->mykey);
-    //   }
-    // }
-    fclose(fout);
+    printf("live done\n");
+    
+    // fclose(fout);
 
     Temp_tempList regs = F_registers();
     struct COL_result cr =  COL_color(livegraph, F_tempMap, regs);
@@ -213,7 +211,6 @@ RA_regAlloc(F_frame f, AS_instrList il)
     ret.coloring = cr.coloring;
 
     if (!cr.spills) {
-      printf("done\n");
       break;
     }
 
@@ -221,8 +218,9 @@ RA_regAlloc(F_frame f, AS_instrList il)
     rewrite_programm(cr.spills, il, f);
   }
   assert(debug != upper && "spill error");
+  printf("phase1 done\n");
   il = del_dup_move(il, ret.coloring);
-  // printf("Del dup done\n");
   ret.il = il;
+  printf("reg alloc done\n");
   return ret;
 }

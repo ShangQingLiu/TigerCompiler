@@ -49,7 +49,6 @@ static Type_t S_look_ty(table_t tenv, symbol_t sym)
 }
 
 /*
-???
  * Compares two type kinds and returns 1 if they are the same
  * or 0 otherwise.
  * The first argument is the type of the variable, etc.
@@ -72,6 +71,8 @@ F_fragList SEM_transProg(exp_t exp)
 	table_t tenv = E_base_tenv();
 	table_t venv = E_base_venv();
 	transExp(Tr_outermost(), venv, tenv, NULL, exp);
+	TableFree(tenv);
+	TableFree(venv);
 	return Tr_getResult();
 }
 

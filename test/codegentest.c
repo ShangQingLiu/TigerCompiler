@@ -31,36 +31,21 @@ static void doProc(FILE *out, F_frame frame, T_stm body)
 	AS_instrList iList;
 	struct COL_result coloring;
 	
-	F_tempMap = Temp_name();
+	// F_tempMap = Temp_name();
 
 	stmList = C_linearize(body);
 	stmList = C_traceSchedule(C_basicBlocks(stmList));
 	// printStmList(stdout, stmList);
 	/* printStmList(stdout, stmList);*/
 	iList  = F_codegen(frame, stmList); /* 9 */
-
-	//printf("cg finish: %x\n", iList);
-	//G_graph fg = FG_AssemFlowGraph(iList);
-	//printf("count = %d", fg->nodecount);
-	//printf("flowgraph finish: %x\n", fg);
-	//Live_graph lg = Live_liveness(fg);
-	//printf("count = %d", lg->graph->nodecount);
-	//printf("livegraph finish: %x\n", lg);
+	
+	// AS_printInstrList(out, iList, Temp_layerMap(F_tempMap, Temp_name())); 
 	
 	struct RA_result ra = RA_regAlloc(frame, iList);
-
+	printf("fmap %p\n", F_tempMap);
 	fprintf(out, "#BEGIN function\n");
-	//proc = F_procEntryExit3(frame, ra.il);
-	//fprintf(out, "%s", proc->prolog);
-	AS_printInstrList(out, iList, Temp_layerMap(F_tempMap, ra.coloring)); // uncomment this to continue
-	//fprintf(out, "%s", proc->epilog);
+	AS_printInstrList(out, ra.il, Temp_layerMap(F_tempMap, ra.coloring)); 
 	fprintf(out, "#END function\n\n");
-
-	//COL_color(lg, NULL, NULL);
-	//fprintf(out, "BEGIN %s\n", Temp_labelstring(F_name(frame)));
-	// AS_printInstrList (stdout, iList,
-	// 				   Temp_layerMap(F_tempMap,Temp_name()));
-	//fprintf(out, "END %s\n\n", Temp_labelstring(F_name(frame)));
 }
 
 int main(int argc, char *argv[])
@@ -75,23 +60,20 @@ int main(int argc, char *argv[])
 		absyn_root = parse(argv[1]);
 		if (!absyn_root)
 			return 1;
-		 
-		#if 0
-			pr_exp(out, absyn_root, 0); /* print absyn data structure */
-			fprintf(out, "\n");
-		#endif
-
+		
 		sprintf(outfile, "%s.ast", argv[1]);
 		out = fopen(outfile, "w");
 		if(absyn_root)
 			pr_exp(out, absyn_root, 0);
 		else
 			fprintf(stderr, "Error!");
+		fclose(out);
+
+		
 		
 		Esc_findEscape(absyn_root); /* set varDec's escape field */
 		
 		frags = SEM_transProg(absyn_root);
-		printf("F: %x\n", frags);
 		if (anyErrors) return 1; /* don't continue */
 		
 		/* convert the filename */
@@ -115,8 +97,9 @@ int main(int argc, char *argv[])
 			}
 		}
 		fclose(out);
+		printf("Compile done\n");
 		return 0;
 	}
-	EM_error(0,"usage: tiger file.tig");
+	EM_error(0,"usage: tcc file.tig");
 	return 1;
 }

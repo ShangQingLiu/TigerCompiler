@@ -8,7 +8,12 @@
 
 void *checked_malloc(int size)
 {
+    static int count = 0;
+    count += size;
     void *p = malloc(size);
+    if (!p) {
+        printf("Size: %d  %d\n", count, size);
+    }
     assert(p);
     return p;
 }

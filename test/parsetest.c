@@ -20,6 +20,7 @@ int main(int argc, char **argv) {
     	pr_exp(out, ast_root, 0);
 	else
 		fprintf(stderr, "Error!");
+    fclose(out);
 
     Esc_findEscape(ast_root); /* set varDec's escape field */
 	

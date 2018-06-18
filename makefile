@@ -39,7 +39,7 @@ PARSE_PROG_NAME=$(BDIR)/parsetest
 SEM_PROG_NAME=$(BDIR)/semantest
 STR_PROG_NAME=$(BDIR)/stringtest
 TREE_PROG_NAME=$(BDIR)/treetest
-PROG_NAME=$(BDIR)/codegentest
+PROG_NAME=$(BDIR)/tcc
 
 all: $(CG_OBJS)
 	$(COMPILER) $^ $(OPTIONS) $(PROG_NAME)
@@ -68,12 +68,17 @@ $(ODIR)/%.o: $(SDIR)/%.c
 $(ODIR)/%.o: $(TESTDIR)/%.c
 	$(COMPILER) $(CFLAGS) $@ $<
 
-$(ODIR)/frame.o: $(SDIR)/x86frame.c
-	$(COMPILER) $(CFLAGS) $@ $<
+# $(ODIR)/frame.o: $(SDIR)/x86frame.c
+# 	$(COMPILER) $(CFLAGS) $@ $<
 	
-$(ODIR)/codegen.o: $(SDIR)/x86codegen.c
+# $(ODIR)/codegen.o: $(SDIR)/x86codegen.c
+# 	$(COMPILER) $(CFLAGS) $@ $<
+
+$(ODIR)/codegen.o: $(SDIR)/MIPScodegen.c
 	$(COMPILER) $(CFLAGS) $@ $<
 
+$(ODIR)/frame.o: $(SDIR)/MIPSframe.c
+	$(COMPILER) $(CFLAGS) $@ $<
 
 $(ODIR)/lex.yy.o: $(SDIR)/lex.yy.c
 	$(COMPILER) $(CFLAGS) $@ $<

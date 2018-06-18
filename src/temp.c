@@ -51,8 +51,8 @@ Temp_temp Temp_newtemp(void)
 {Temp_temp p = (Temp_temp) checked_malloc(sizeof (*p));
  p->num=temps++;
  {char r[16];
-  // sprintf(r, "t%d", p->num);
-  // Temp_enter(Temp_name(), p, string(r));
+  sprintf(r, "t%d", p->num-100);
+  Temp_enter(Temp_name(), p, string(r));
  }
  return p;
 }

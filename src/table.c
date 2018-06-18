@@ -97,3 +97,15 @@ void TAB_dump(table_t t, tab_dump_func_t show)
 	t->top = k;
 	t->table[index] = b;
 }
+
+void TableFree(table_t tab) {
+	int i;
+	binder b, p;
+	for(; i < TABSIZE; i++) {
+		for(b=tab->table[i]; b; ) {
+			p = b;
+			b=b->next;
+			free(p);
+		}
+	}
+}

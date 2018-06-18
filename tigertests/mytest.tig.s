@@ -1,6 +1,10 @@
+#BEGIN function
 L13:
-mov eax,8
-mov ebx,2
-add eax,ebx+eax
+li t3, 8
+li t4, 2
+add t5, t2, t0
+j L12
 L12:
+
+#END function
 

@@ -4,14 +4,14 @@
 #include <stdio.h>
 #include "liveness.h"
 #include "stdlib.h"
-// #define COL_DEBUG
+#define COL_DEBUG
 
-char **AdjMatrix;  // Adjacent matrix
-G_node *Alias;     // Coalesced nodes, a disjoint set
-int *Degree;       // Node degree
-list_t *NodeMoves; // Move related node list
-G_node *Stack;     // Stack for coloring
-int sp;            // Stack pointer
+char **AdjMatrix;       // Adjacent matrix
+G_node *Alias;          // Coalesced nodes, a disjoint set
+int *Degree;            // Node degree
+list_t *NodeMoves;      // Move related node list
+G_node *Stack;          // Stack for coloring
+int sp;                 // Stack pointer
 list_t simplifyList, freezeList, spillList, coaList, actualSpill;
 
 char rNames[6][5] = {"eax", "ebx", "ecx", "edx", "esi", "edi"};
@@ -71,29 +71,29 @@ static void Simplify(Live_graph lg)
         free(p);
         Degree[n->mykey] = -1; // Marked as simplified
         Stack[sp++] = n;
-        #ifdef COL_DEBUG
-        printf("sim %d  sp %d\nBefore Sim:\n", n->mykey, sp);
-        int i;        
-        for (i=0; i<7; i++) {
-            printf("D[%d]: %d\n", i, Degree[i]);
-        }
-        #endif
+        // #ifdef COL_DEBUG
+        // printf("sim %d  sp %d\nBefore Sim:\n", n->mykey, sp);
+        // int i;        
+        // for (i=0; i<7; i++) {
+        //     printf("D[%d]: %d\n", i, Degree[i]);
+        // }
+        // #endif
         
         for (l = n->succs; l; l = l->tail)
         {
             decDegree(l->head);
         }
-        #ifdef COL_DEBUG
-        printf("After dec:\n");
-        for (i=0; i<7; i++) {
-            printf("D[%d]: %d\n", i, Degree[i]);
-        }
-        printf("\n");
-        for (p=simplifyList; p; p=p->tail) {
-            printf("%d ", ((G_node)(p->data))->mykey);
-        }
-        printf("\n");
-        #endif
+        // #ifdef COL_DEBUG
+        // printf("After dec:\n");
+        // for (i=0; i<7; i++) {
+        //     printf("D[%d]: %d\n", i, Degree[i]);
+        // }
+        // printf("\n");
+        // for (p=simplifyList; p; p=p->tail) {
+        //     printf("%d ", ((G_node)(p->data))->mykey);
+        // }
+        // printf("\n");
+        // #endif
     }
 }
 
@@ -302,8 +302,8 @@ static void preProc(Live_graph lg)
     n = lg->graph->nodecount;
 
     #ifdef COL_DEBUG
-    //printf("preproc  %x\n", lg->graph);
-    //printf("Nodes: %d\n", n);
+    printf("preproc  %x\n", lg->graph);
+    printf("Nodes: %d\n", n);
     #endif    
 
     // Init global variables    
@@ -405,24 +405,30 @@ static Temp_map AssignColor()
 {
     char colorPad[K+1];
     int i, count = 0;
+    printf("a\n");
     Temp_map mmap = Temp_empty();
+    printf("dd\n");
     while (sp)
     {
+        printf("Assign:%d\n", sp);
         G_node n = Stack[--sp];
         memset(colorPad, 0, (K+1)*sizeof(char));
+        printf("%p\n", n);
         G_nodeList l;
         for (l=n->succs; l; l=l->tail)
         {
             G_node nei = l->head;
+            assert(nei);
+            printf("nei %d\n", nei->mykey);
             if (Degree[nei->mykey] > 0 && Alias[nei->mykey] == 0)
             {
+                printf("!!\n");
                 int neiCol = regToInt(Temp_look(mmap, nei->info));
-                #ifdef COL_DEBUG
-                printf("\tNei %d\n", neiCol);
-                #endif
+                printf("??\n");
                 colorPad[neiCol] = 1;
             }
         }
+        printf("succ done\n");
         for (i=1; i<=K; i++)
         {
             if (colorPad[i]) continue;
@@ -441,13 +447,13 @@ static Temp_map AssignColor()
             Temp_enter(mmap, n->info, rNames[i-1]);
             #ifdef COL_DEBUG
 			printf("Node%d  Color%d sp%d\n", n->mykey, i, sp);
-			// printf("%d\n", (int)Temp_look(mmap, n->info));
+			printf("%d\n", regToInt(Temp_look(mmap, n->info)));
             #endif
         }
     }
-    // #ifdef COL_DEBUG
+    #ifdef COL_DEBUG
     printf("%d Actual spills\n", count);
-    // #endif
+    #endif
     list_t p;
     for (p=coaList; p; p=p->tail)
     {        
@@ -499,14 +505,22 @@ struct COL_result COL_color(Live_graph lg, Temp_map initial, Temp_tempList regs)
             }
         }
     }
-	#ifdef COL_DEBUG
-    printf("sp: %d\n", sp);
+	
+    #ifdef COL_DEBUG
+    printf("sp done1: %d\n", sp);
     #endif
+    
+
     struct COL_result rst;
     rst.coloring = AssignColor(lg);
     rst.spills = actualSpill;
 
+    #ifdef COL_DEBUG
+    printf("sp done: %d\n", sp);
+    #endif
+
     endProc(lg);
+    
     #ifdef COL_DEBUG
     printf("colend\n");
     #endif

@@ -1,0 +1,10 @@
+/* 12.34 */ */
+/* legal /* comment */ */
+let
+    var 1a := 2
+    var _s := "1234\"56"
+    var ws := "123\
+    456"
+in
+    a = a + 5
+end

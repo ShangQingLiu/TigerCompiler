@@ -1031,7 +1031,7 @@ YY_RULE_SETUP
 case 59:
 YY_RULE_SETUP
 #line 125 ".\\src\\tiger.l"
-{adjust(); EM_error(EM_tokPos, "illegal token");}
+{adjust(); EM_newline(); }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP

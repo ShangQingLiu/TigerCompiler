@@ -1,0 +1,6 @@
+	letExp(
+		decList(
+			typeDec(
+				nametyList(
+					namety(any,
+						

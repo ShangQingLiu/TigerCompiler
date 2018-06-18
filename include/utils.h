@@ -2,6 +2,7 @@
 #define _UTILS_H_
 
 #include <assert.h>
+#include "stdlib.h"
 
 typedef char* string_t;
 string_t string(const char *str);

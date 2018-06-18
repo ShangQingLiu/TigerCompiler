@@ -172,6 +172,7 @@ static void pr_ty(FILE *out, ty_t v, int d) {
    fprintf(out, "arrayTy(%s)", SymbolName(v->u.array));
    break;
  default:
+   printf("%d\n", v->kind);
    assert(0); 
  } 
 }

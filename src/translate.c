@@ -1,8 +1,3 @@
-/*
- * Translate module for translating abstract syntax tree
- * to IR form.
- * Created by Craig McL on 4/5/2012
- */
 #include <stdlib.h>
 #include "translate.h"
 #include "tree.h"
@@ -611,6 +606,5 @@ F_fragList Tr_getResult(void)
 	for (cursor = stringList; cursor; cursor = cursor->tail)
 		prev = cursor;
 	if (prev) prev->tail = fragList;
-	printf("translate: %x\n%x\n", stringList, fragList);
 	return stringList ? stringList : fragList;
 }

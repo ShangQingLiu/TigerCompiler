@@ -67,6 +67,8 @@ Temp_temp F_RA(void); /* return address register */
 
 Temp_temp F_RV(void); /* Return value location */
 
+Temp_temp F_LO(void);
+
 T_exp F_Exp(F_access access, T_exp framePtr);
 
 T_exp F_externalCall(string_t str, T_expList args);

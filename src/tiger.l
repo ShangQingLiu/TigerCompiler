@@ -122,7 +122,7 @@ type		{ adjust(); return TYPE; }
 	\\\\		{adjust(); appendstr(yytext);}
 	\\\"		{adjust(); appendstr(yytext);}
 	\\[ \n\t\r\f]+\\ {adjust();}
-	\\(.|\n)	{adjust(); EM_error(EM_tokPos, "illegal token");}
+	\\(.|\n)	{adjust(); EM_newline(); }
 	\n			{adjust(); EM_error(EM_tokPos, "illegal token");}
 	[^\"\\\n]+ 	{adjust(); appendstr(yytext);}
 }

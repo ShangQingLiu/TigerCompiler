@@ -183,4 +183,5 @@ void Esc_findEscape(exp_t expr)
     _depth = 0;
     _env = SymbolEmpty();
     traverse_expr(expr);
+    TableFree(_env);
 }

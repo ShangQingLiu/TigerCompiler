@@ -110,8 +110,12 @@ struct stmExp se;
       );
     case T_ESEQ:
       se = do_exp(exp->u.ESEQ.exp);
+      return StmExp(seq(do_stm(exp->u.ESEQ.stm), se.s), se.e);
+    case T_CALL:
+      return StmExp(reorder(getCallForRlist(exp)), exp);
+    default:
       return StmExp(reorder(NULL), exp);
-  }
+    }
 }
 
 static T_stm do_stm(T_stm stm)

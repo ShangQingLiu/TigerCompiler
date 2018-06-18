@@ -5,6 +5,8 @@
 static G_table liveMap;
 static T_table tempMap;
 
+// #define L_DEBUG
+
 //record MOVE edge
 Live_moveList Live_MoveList(G_node src, G_node dst, Live_moveList tail)
 {
@@ -138,29 +140,33 @@ Live_graph Live_liveness(G_graph flow)
 	tempMap = T_empty();
 	Live_graph lg = Live_Graph(G_Graph(), NULL); //conflict graph
 
+	
 	//iterative compute the live-in and live-out
 	Temp_tempList *liveIn = checked_malloc(flow->nodecount*sizeof(*liveIn)), *liveInPrime = checked_malloc(flow->nodecount*sizeof(*liveIn));
 	Temp_tempList *liveOut = checked_malloc(flow->nodecount*sizeof(*liveIn)), *liveOutPrime = checked_malloc(flow->nodecount*sizeof(*liveIn));
+	
 	//initialize
 	int i;
 	for(i=0; i<flow->nodecount; i++) {
 		liveIn[i] = liveOut[i] = NULL;
+		liveInPrime[i] = liveOutPrime[i] = NULL;
 	}
 	G_nodeList p, t;
 	while(1) {
 		for(p=flow->mynodes; p; p=p->tail) {
 			//duplicate 
 			int index = p->head->mykey;
+			freeList(liveInPrime[index]);
+			freeList(liveOutPrime[index]);
 			liveInPrime[index] = duplicateList(liveIn[index]);
 			liveOutPrime[index] = duplicateList(liveOut[index]);
 			//calculate live-in and live-out
-			Temp_tempList tt = liveIn[index];
-			liveIn[index] = tempList_join(tempList_diff(liveOut[index], FG_def(p->head)),  
-								FG_use(p->head));
+			Temp_tempList tt = liveIn[index], tt2 = tempList_diff(liveOut[index], FG_def(p->head));
+			liveIn[index] = tempList_join(tt2, FG_use(p->head));
 			freeList(tt);
+			freeList(tt2);
 			for(t=p->head->succs; t; t=t->tail) {
-				tt = liveOut[index];
-				
+				tt = liveOut[index];				
 				liveOut[index] = tempList_join(liveOut[index], liveIn[t->head->mykey]);
 				freeList(tt);
 			}
@@ -169,8 +175,8 @@ Live_graph Live_liveness(G_graph flow)
 
 		bool isEnd = TRUE;
 		for(i=0; i<flow->nodecount; i++) {
-			isEnd = isEnd & tempList_Euqal(liveInPrime[i], liveIn[i])\
-						 & tempList_Euqal(liveOutPrime[i], liveOut[i]);
+			isEnd = isEnd && tempList_Euqal(liveInPrime[i], liveIn[i])\
+						 && tempList_Euqal(liveOutPrime[i], liveOut[i]);
 			if(!isEnd)
 				break;
 		}
@@ -212,11 +218,18 @@ Live_graph Live_liveness(G_graph flow)
 				// printf("Move %d-%d\n", n1->mykey, n2->mykey);
 			}
 		}
+		
 		Temp_tempList outList = lookupLiveMap(liveMap, p->head);
 		Temp_tempList defList = FG_def(p->head);
-		// printf("def[%d]:%p\n",p->head->mykey, defList);
+		#ifdef L_DEBUG
+		printf("def[%d]:%p\n",p->head->mykey, defList);
+		#endif
 		for(p1=defList; p1; p1=p1->tail) {	
 			for(p2=outList; p2; p2=p2->tail) {
+				#ifdef L_DEBUG
+				printf("enter %p %p\n", p2->head, p2);
+				#endif
+				// if (!p2->head) continue;
 				p2->head->num = -1;
 				if((n1 = T_look(tempMap, p1->head)) == NULL) {
 					n1 = G_Node(lg->graph, p1->head);
@@ -234,7 +247,22 @@ Live_graph Live_liveness(G_graph flow)
 			}
 		}
 	}
-	// printf("end!\n");
+
+	// TableFree(tempMap);
+	// TableFree(liveMap);
+	
+
+	for(i=0; i<flow->nodecount; i++) {
+		freeList(liveIn[i]);
+		freeList(liveOut[i]);
+		freeList(liveInPrime[i]);
+		freeList(liveOutPrime[i]);
+	}
+	
+	free(liveIn);
+	free(liveOut);
+	free(liveInPrime);
+	free(liveOutPrime);
 
 	return lg;
 }
